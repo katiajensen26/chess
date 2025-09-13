@@ -57,12 +57,13 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
+        Collection<ChessMove> moves = new HashSet<>();
         if (piece.getPieceType() == PieceType.BISHOP) {
-            return List.of(new ChessMove(new ChessPosition(5,4), new ChessPosition(1,8), null));
+            MoveGenerator generator = new BishopMoveGenerator();
+            moves = generator.pieceMoves(board, myPosition);
         }
-        return List.of();
         //var moves = new HashSet<ChessMove>();
-        //return moves;
+        return moves;
 
     }
 
