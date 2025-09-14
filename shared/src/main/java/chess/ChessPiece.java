@@ -73,7 +73,9 @@ public class ChessPiece {
         } else if (piece.getPieceType() == PieceType.KING) {
             MoveGenerator generator = new KingMoveGenerator();
             moves = generator.pieceMoves(board, myPosition);
-
+        } else if (piece.getPieceType() == PieceType.PAWN){
+            MoveGenerator generator = new PawnMoveGenerator();
+            moves = generator.pieceMoves(board, myPosition);
         }
         return moves;
 
