@@ -70,6 +70,9 @@ public class ChessPiece {
         } else if (piece.getPieceType() == PieceType.KNIGHT) {
             MoveGenerator generator = new KnightMoveGenerator();
             moves = generator.pieceMoves(board, myPosition);
+        } else if (piece.getPieceType() == PieceType.KING) {
+            MoveGenerator generator = new KingMoveGenerator();
+            moves = generator.pieceMoves(board, myPosition);
 
         }
         return moves;
