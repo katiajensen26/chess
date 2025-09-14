@@ -29,9 +29,21 @@ public class BishopMoveGenerator implements MoveGenerator{
                 }
 
                 ChessPosition newPosition = new ChessPosition(currentRow, currentColumn);
-                ChessMove move = new ChessMove(myPosition, newPosition, null);
+                ChessPiece possiblePiece = board.getPiece(newPosition);
+                ChessPiece bishop = board.getPiece(myPosition);
 
-                moves.add(move);
+                if (possiblePiece == null) {
+                    ChessMove move = new ChessMove(myPosition, newPosition, null);
+                    moves.add(move);
+                    continue;
+                } else if (possiblePiece.getTeamColor() != bishop.getTeamColor()) {
+                    ChessMove move = new ChessMove(myPosition, newPosition, null);
+                    moves.add(move);
+                    break;
+
+                } else {
+                    break;
+                }
             }
 
         }
