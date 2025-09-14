@@ -1,18 +1,17 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-public class BishopMoveGenerator implements MoveGenerator{
+public class RookMoveGenerator implements MoveGenerator {
 
 
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new HashSet<>();
 
-        int[][] directions = {{+1, +1}, {+1, -1}, {-1, +1}, {-1, -1}};
+        int[][] directions = {{+1, 0}, {-1, 0}, {0, +1}, {0, -1}};
 
         for (int[] direction: directions) {
             int moveRow = direction[0];
@@ -31,13 +30,13 @@ public class BishopMoveGenerator implements MoveGenerator{
 
                 ChessPosition newPosition = new ChessPosition(currentRow, currentColumn);
                 ChessPiece possiblePiece = board.getPiece(newPosition);
-                ChessPiece bishop = board.getPiece(myPosition);
+                ChessPiece rook = board.getPiece(myPosition);
 
                 if (possiblePiece == null) {
                     ChessMove move = new ChessMove(myPosition, newPosition, null);
                     moves.add(move);
                     continue;
-                } else if (possiblePiece.getTeamColor() != bishop.getTeamColor()) {
+                } else if (possiblePiece.getTeamColor() != rook.getTeamColor()) {
                     ChessMove move = new ChessMove(myPosition, newPosition, null);
                     moves.add(move);
                     break;
@@ -45,10 +44,9 @@ public class BishopMoveGenerator implements MoveGenerator{
                 } else {
                     break;
                 }
+
             }
-
         }
-
         return moves;
     }
 }

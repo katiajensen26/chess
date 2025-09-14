@@ -61,8 +61,13 @@ public class ChessPiece {
         if (piece.getPieceType() == PieceType.BISHOP) {
             MoveGenerator generator = new BishopMoveGenerator();
             moves = generator.pieceMoves(board, myPosition);
+        } else if (piece.getPieceType() == PieceType.ROOK) {
+            MoveGenerator generator = new RookMoveGenerator();
+            moves = generator.pieceMoves(board, myPosition);
+        } else if (piece.getPieceType() == PieceType.QUEEN) {
+            MoveGenerator generator = new QueenMoveGenerator();
+            moves = generator.pieceMoves(board, myPosition);
         }
-        //var moves = new HashSet<ChessMove>();
         return moves;
 
     }
