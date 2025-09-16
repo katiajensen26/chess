@@ -25,9 +25,14 @@ public class PawnMoveGenerator implements MoveGenerator{
         ChessPosition newPosition1 = new ChessPosition(goForward1, currentColumn);
         ChessPosition newPosition2 = new ChessPosition(goForward2, currentColumn);
 
+        ChessPiece.PieceType[] promotionType = {ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.ROOK, ChessPiece.PieceType.BISHOP, ChessPiece.PieceType.KNIGHT};
+
         if (board.getPiece(newPosition1) == null) {
             if (goForward1 == lastRow) {
-                //add promotion logic
+                for (ChessPiece.PieceType proType : promotionType) {
+                    ChessMove move = new ChessMove(myPosition, newPosition1, proType);
+                    moves.add(move);
+                }
             } else {
                 ChessMove move = new ChessMove(myPosition, newPosition1, null);
                 moves.add(move);
@@ -37,23 +42,22 @@ public class PawnMoveGenerator implements MoveGenerator{
                 ChessMove move = new ChessMove(myPosition, newPosition2, null);
                 moves.add(move);
             }
-//            } else {
-//                ChessMove move = new ChessMove(myPosition, newPosition1, null);
-//                moves.add(move);
-//            }
         }
 
         for (int[] cap : capture) {
             int moveRow = currentRow + cap[0];
             int moveColumn = currentColumn + cap[1];
 
-            if (currentRow < 1 || currentRow > 8 || currentColumn < 1 || currentColumn > 8) {
+            if (moveRow >= 1 && moveRow <= 8 && moveColumn >= 1 && moveColumn <= 8) {
                 ChessPosition capPosition = new ChessPosition(moveRow, moveColumn);
                 ChessPiece target = board.getPiece(capPosition);
 
                 if (target != null && target.getTeamColor() != pawn.getTeamColor()) {
                     if (moveRow == lastRow) {
-                        //promotion logic
+                        for (ChessPiece.PieceType proType : promotionType) {
+                            ChessMove move = new ChessMove(myPosition, capPosition, proType);
+                            moves.add(move);
+                        }
                     } else {
                         ChessMove move = new ChessMove(myPosition, capPosition, null);
                         moves.add(move);
