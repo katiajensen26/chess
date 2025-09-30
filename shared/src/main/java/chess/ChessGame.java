@@ -51,7 +51,11 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        return piece.pieceMoves(board, startPosition);
+    }
+
+    private void executeMove(ChessMove move) {
+        return;
     }
 
     /**
@@ -67,10 +71,14 @@ public class ChessGame {
             throw new InvalidMoveException("No piece at this position.");
         } else if (piece.getTeamColor() != currentTeam) {
             throw new InvalidMoveException("You can't move this piece.");
-        } else if (move != validMoves(move.getStartPosition())) {
+        } else if (!validMoves(move.getStartPosition()).contains(move)) {
             throw new InvalidMoveException("You can't move there.");
         }
 
+
+        executeMove(move);
+
+        setTeamTurn(currentTeam == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
 
     }
 
