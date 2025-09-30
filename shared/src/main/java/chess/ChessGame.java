@@ -55,7 +55,14 @@ public class ChessGame {
     }
 
     private void executeMove(ChessMove move) {
-        return;
+        piece = board.getPiece(move.getStartPosition());
+
+        if (board.getPiece(move.getEndPosition()) != null) {
+            board.removePiece(move.getEndPosition());
+        }
+
+        board.removePiece(move.getStartPosition());
+        board.addPiece(move.getEndPosition(), piece);
     }
 
     /**
