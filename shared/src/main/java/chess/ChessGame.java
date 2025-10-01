@@ -56,6 +56,7 @@ public class ChessGame {
 
     private void executeMove(ChessMove move) {
         piece = board.getPiece(move.getStartPosition());
+        int lastRow = (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? 8 : 1;
 
         if (board.getPiece(move.getEndPosition()) != null) {
             board.removePiece(move.getEndPosition());
@@ -63,6 +64,12 @@ public class ChessGame {
 
         board.removePiece(move.getStartPosition());
         board.addPiece(move.getEndPosition(), piece);
+
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN && move.getEndPosition().getRow() == lastRow) {
+                ChessPiece.PieceType promoType = (move.getPromotionPiece() != null) ? move.getPromotionPiece() : ChessPiece.PieceType.QUEEN;
+                board.removePiece(move.getEndPosition());
+                board.addPiece(move.getEndPosition(), new ChessPiece(piece.getTeamColor(), promoType));
+        }
     }
 
     /**
