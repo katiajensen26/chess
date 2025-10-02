@@ -19,7 +19,11 @@ public class ChessGame {
     private ChessPiece piece;
 
     public ChessGame() {
+        this.board = new ChessBoard();
 
+        board.resetBoard();
+
+        this.currentTeam = TeamColor.WHITE;
     }
 
     /**
@@ -182,7 +186,30 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+
+        if (isInCheck(teamColor)) {
+            return false;
+        }
+
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition piecePosition = new ChessPosition(row, col);
+                ChessPiece currentPiece = getPiece(piecePosition);
+
+                if (currentPiece != null && currentPiece.getTeamColor() == teamColor) {
+                    Collection<ChessMove> legalMoves = validMoves(piecePosition);
+                    if (!legalMoves.isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private ChessPiece getPiece(ChessPosition piecePosition) {
+        return board.getPiece(piecePosition);
     }
 
     private ChessPosition findKing(TeamColor teamColor) {
