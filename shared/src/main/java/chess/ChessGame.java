@@ -3,6 +3,7 @@ package chess;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -53,7 +54,33 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        return piece.pieceMoves(board, startPosition);
+        ChessPiece currentPiece = board.getPiece(startPosition);
+        if (currentPiece == null) {
+            return new ArrayList<>();
+        }
+
+        Collection<ChessMove> allMoves = currentPiece.pieceMoves(board, startPosition);
+
+        Collection<ChessMove> legalMoves = new ArrayList<>();
+
+        for (ChessMove move : allMoves) {
+            ChessPiece testCapture = board.getPiece(move.getEndPosition());
+            board.removePiece(move.getStartPosition());
+            board.addPiece(move.getEndPosition(), currentPiece);
+
+            if (!isInCheck(currentPiece.getTeamColor())) {
+                legalMoves.add(move);
+            }
+
+            board.removePiece(move.getEndPosition());
+            board.addPiece(move.getStartPosition(), currentPiece);
+
+            if (testCapture != null) {
+                board.addPiece(move.getEndPosition(), testCapture);
+            }
+        }
+
+        return legalMoves;
     }
 
     private void executeMove(ChessMove move) {
@@ -113,7 +140,7 @@ public class ChessGame {
             for (int col = 1; col <= 8; col++) {
                 ChessPiece currentPiece = board.getPiece(new ChessPosition(row, col));
                 if (currentPiece != null && currentPiece.getTeamColor() != teamColor) {
-                    for (ChessMove move : validMoves(new ChessPosition(row, col))) {
+                    for (ChessMove move : possibleLegalMoves(new ChessPosition(row, col))) {
                         if (move.getEndPosition().equals(kingPosition)) {
                             return true;
                         }
@@ -187,6 +214,16 @@ public class ChessGame {
         return allPositions;
     }
 
+    public Collection<ChessMove> possibleLegalMoves(ChessPosition startPosition) {
+        piece = board.getPiece(startPosition);
+
+        if (piece == null) {
+            return new ArrayList<>();
+        }
+
+        return piece.pieceMoves(board, startPosition);
+    }
+
 
     /**
      * Sets this game's chessboard with a given board
@@ -204,5 +241,19 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return currentTeam == chessGame.currentTeam && Objects.equals(board, chessGame.board) && Objects.equals(move, chessGame.move) && Objects.equals(piece, chessGame.piece);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(currentTeam, board, move, piece);
     }
 }
