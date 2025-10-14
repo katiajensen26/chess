@@ -18,6 +18,8 @@ public class Server {
 
         server.post("user", ctx -> register(ctx));
 
+        server.post("session", ctx -> login(ctx));
+
     }
 
     private void register(Context ctx) {
@@ -32,6 +34,16 @@ public class Server {
         ctx.result(serializer.toJson(res));
 
 
+    }
+
+    private void login(Context ctx) {
+        var serializer = new Gson();
+        String reqJson = ctx.body();
+        var req = serializer.fromJson(reqJson, Map.class);
+
+        var res = Map.of("username", req.get("username"), "authToken", "yzx");
+
+        ctx.result(serializer.toJson(res));
     }
 
     public int run(int desiredPort) {
