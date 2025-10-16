@@ -32,14 +32,21 @@ public class Server {
         try {
             var serializer = new Gson();
             String reqJson = ctx.body();
+
             var user = serializer.fromJson(reqJson, UserData.class);
 
+            if (user.username() == null || user.password() == null || user.email() == null) {
+                throw new BadRequestException("Error: bad request");
+            }
+
             var authData = userService.register(user);
-            ctx.result(serializer.toJson(authData));
+            ctx.status(200).result(serializer.toJson(authData));
+
         //create exception class and figure this out
         } catch (UserService.AlreadyTakenException ex) {
-            var msg = String.format("error already taken");
             ctx.status(403).result(ex.getMessage());
+        } catch (BadRequestException e) {
+            ctx.status(400).result(e.getMessage());
         }
 
 
