@@ -37,9 +37,9 @@ public class Server {
             var authData = userService.register(user);
             ctx.result(serializer.toJson(authData));
         //create exception class and figure this out
-        } catch (Exception ex) {
+        } catch (UserService.AlreadyTakenException ex) {
             var msg = String.format("error already taken");
-            ctx.status(403).result(msg);
+            ctx.status(403).result(ex.getMessage());
         }
 
 
