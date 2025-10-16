@@ -21,6 +21,14 @@ public class UserService {
         return new AuthData(user.username(), generateAuthToken());
     }
 
+    public AuthData login(UserData user) {
+
+        dataAccess.getUser(user.username());
+
+        return new AuthData(user.username(), generateAuthToken());
+
+    }
+
     public static class AlreadyTakenException extends Exception {
         private final String message;
 

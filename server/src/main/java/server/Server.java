@@ -53,15 +53,13 @@ public class Server {
     }
 
     private void login(Context ctx) {
-//        var serializer = new Gson();
-//        String reqJson = ctx.body();
-//        var user = serializer.fromJson(reqJson, UserData.class);
-//
-//        var authData = userService.register(user);
-//
-//        var res = Map.of("username", req.get("username"), "authToken", "yzx");
-//
-//        ctx.result(serializer.toJson(res));
+        var serializer = new Gson();
+        String reqJson = ctx.body();
+        var user = serializer.fromJson(reqJson, UserData.class);
+
+        var authData = userService.login(user);
+        ctx.status(200).result(serializer.toJson(authData));
+
     }
 
     public int run(int desiredPort) {
