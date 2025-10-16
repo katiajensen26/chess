@@ -11,9 +11,9 @@ public class UserService {
         this.dataAccess = dataAccess;
     }
 
-    public AuthData register(UserData user) throws AlreadyTakenException {
+    public AuthData register(UserData user) throws ErrorException {
         if (dataAccess.getUser(user.username()) != null) {
-            throw new AlreadyTakenException("Error: Already Taken");
+            throw new ErrorException("Error: Already Taken");
         }
         dataAccess.createUser(user);
         var authData = new AuthData(user.username(), generateAuthToken());
@@ -21,18 +21,27 @@ public class UserService {
         return new AuthData(user.username(), generateAuthToken());
     }
 
-    public AuthData login(UserData user) {
+    public AuthData login(UserData user) throws ErrorException {
 
-        dataAccess.getUser(user.username());
+        UserData storedUser = dataAccess.getUser(user.username());
+
+        if (storedUser == null) {
+            throw new ErrorException("Error: username doesn't exist");
+        }
+
+        if (!storedUser.password().equals(user.password())) {
+            throw new ErrorException("Error: unauthorized");
+        }
+
 
         return new AuthData(user.username(), generateAuthToken());
 
     }
 
-    public static class AlreadyTakenException extends Exception {
+    public static class ErrorException extends Exception {
         private final String message;
 
-        public AlreadyTakenException(String message) {
+        public ErrorException(String message) {
             super(message);
             this.message = message;
         }
@@ -42,6 +51,7 @@ public class UserService {
         }
 
     }
+
     //replace this with the script from the specs
     private String generateAuthToken() {
         return "xyz";

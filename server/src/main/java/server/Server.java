@@ -43,7 +43,7 @@ public class Server {
             ctx.status(200).result(serializer.toJson(authData));
 
         //create exception class and figure this out
-        } catch (UserService.AlreadyTakenException ex) {
+        } catch (UserService.ErrorException ex) {
             ctx.status(403).result(ex.getMessage());
         } catch (BadRequestException e) {
             ctx.status(400).result(e.getMessage());
@@ -58,7 +58,7 @@ public class Server {
             String reqJson = ctx.body();
             var user = serializer.fromJson(reqJson, UserData.class);
 
-            if (user.username() == null || user.password() == null || user.email() == null) {
+            if (user.username() == null || user.password() == null) {
                 throw new BadRequestException("Error: bad request");
             }
 
@@ -67,6 +67,8 @@ public class Server {
 
         } catch (BadRequestException e) {
             ctx.status(400).result(e.getMessage());
+        } catch (UserService.ErrorException ex) {
+            ctx.status(401).result(ex.getMessage());
         }
     }
 
