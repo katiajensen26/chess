@@ -26,6 +26,8 @@ public class Server {
 
         server.post("session", ctx -> login(ctx));
 
+        server.delete("session", ctx -> logout(ctx));
+
     }
 
     private void register(Context ctx) {
@@ -70,6 +72,15 @@ public class Server {
         } catch (UserService.ErrorException ex) {
             ctx.status(401).result(ex.getMessage());
         }
+    }
+
+    private void logout(Context ctx) {
+
+        var serializer = new Gson();
+        String reqJson = ctx.header("authorization");
+        var authData = serializer.fromJson(reqJson, AuthData.class);
+
+        var result = userService.logout(authData);
     }
 
     public int run(int desiredPort) {

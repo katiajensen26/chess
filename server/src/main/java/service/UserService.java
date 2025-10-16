@@ -38,6 +38,11 @@ public class UserService {
 
     }
 
+    //fix this
+    public AuthData logout(AuthData authToken) {
+        return authToken;
+    }
+
     public static class ErrorException extends Exception {
         private final String message;
 
