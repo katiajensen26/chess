@@ -53,13 +53,21 @@ public class Server {
     }
 
     private void login(Context ctx) {
-        var serializer = new Gson();
-        String reqJson = ctx.body();
-        var user = serializer.fromJson(reqJson, UserData.class);
+        try {
+            var serializer = new Gson();
+            String reqJson = ctx.body();
+            var user = serializer.fromJson(reqJson, UserData.class);
 
-        var authData = userService.login(user);
-        ctx.status(200).result(serializer.toJson(authData));
+            if (user.username() == null || user.password() == null || user.email() == null) {
+                throw new BadRequestException("Error: bad request");
+            }
 
+            var authData = userService.login(user);
+            ctx.status(200).result(serializer.toJson(authData));
+
+        } catch (BadRequestException e) {
+            ctx.status(400).result(e.getMessage());
+        }
     }
 
     public int run(int desiredPort) {
