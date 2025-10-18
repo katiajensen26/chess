@@ -77,7 +77,7 @@ public class Server {
     private void logout(Context ctx) {
 
         var serializer = new Gson();
-        String reqJson = ctx.header("authorization");
+        String reqJson = ctx.header("authorization: <authToken>");
         var userData = serializer.fromJson(reqJson, UserData.class);
 
         var result = userService.logout(userData);
