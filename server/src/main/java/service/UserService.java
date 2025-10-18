@@ -11,6 +11,10 @@ public class UserService {
         this.dataAccess = dataAccess;
     }
 
+    public void clear() {
+        dataAccess.clear();
+    }
+
     public AuthData register(UserData user) throws ErrorException {
         if (dataAccess.getUser(user.username()) != null) {
             throw new ErrorException("Error: Already Taken");
@@ -39,8 +43,9 @@ public class UserService {
     }
 
     //fix this
-    public AuthData logout(AuthData authToken) {
-        return authToken;
+    public UserData logout(UserData username) {
+        //get auth token, verify they exist first.
+        return username;
     }
 
     public static class ErrorException extends Exception {

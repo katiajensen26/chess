@@ -78,9 +78,9 @@ public class Server {
 
         var serializer = new Gson();
         String reqJson = ctx.header("authorization");
-        var authData = serializer.fromJson(reqJson, AuthData.class);
+        var userData = serializer.fromJson(reqJson, UserData.class);
 
-        var result = userService.logout(authData);
+        var result = userService.logout(userData);
     }
 
     public int run(int desiredPort) {
