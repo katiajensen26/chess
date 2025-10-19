@@ -5,19 +5,20 @@ import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.*;
-import org.eclipse.jetty.server.Authentication;
+import service.GameService;
 import service.UserService;
-
-import java.util.Map;
+import service.ErrorException;
 
 public class Server {
 
     private final Javalin server;
     private final UserService userService;
+    private final GameService gameService;
 
     public Server() {
         var dataAccess = new MemoryDataAccess();
         userService = new UserService(dataAccess);
+        gameService = new GameService(dataAccess);
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
@@ -46,7 +47,7 @@ public class Server {
             ctx.status(200).result(serializer.toJson(authData));
 
         //create exception class and figure this out
-        } catch (UserService.ErrorException ex) {
+        } catch (ErrorException ex) {
             ctx.status(403).result(ex.getMessage());
         } catch (BadRequestException e) {
             ctx.status(400).result(e.getMessage());
@@ -70,28 +71,33 @@ public class Server {
 
         } catch (BadRequestException e) {
             ctx.status(400).result(e.getMessage());
-        } catch (UserService.ErrorException ex) {
+        } catch (ErrorException ex) {
             ctx.status(401).result(ex.getMessage());
         }
     }
 
-    private void logout(Context ctx) throws UserService.ErrorException {
-        var serializer = new Gson();
-        String authData = ctx.header("authorization");
+    private void logout(Context ctx) throws ErrorException {
+        try {
+            String authData = ctx.header("authorization");
 
-        if (authData == null) {
-            throw new UserService.ErrorException("Error: unauthorized");
+            if (authData == null) {
+                throw new ErrorException("Error: unauthorized");
+            }
+
+            userService.logout(authData);
+            ctx.status(200).result();
+        } catch (ErrorException ex){
+            ctx.status(401).result(ex.getMessage());
         }
-
-        userService.logout(authData);
-        ctx.status(200).result();
     }
 
-    private void createGame(Context ctx) {
+    private void createGame(Context ctx) throws ErrorException {
         var serializer = new Gson();
         String reqJson = ctx.body();
         String authData = ctx.header("authorization");
-        var game = serializer.fromJson(reqJson, GameData)
+        var gameName = serializer.fromJson(reqJson, GameData.class);
+
+        gameService.createGame(gameName, authData);
     }
 
     public int run(int desiredPort) {

@@ -36,4 +36,72 @@ class UserServiceTest {
         assertFalse(authData.authToken().isEmpty());
 
     }
+
+    @Test
+    void clear() {
+    }
+
+    @Test
+    void login() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        var user = new UserData("joe", "toomanysecrets", "j@j.com");
+        var userService = new UserService(db);
+
+        userService.register(user);
+        var authData = userService.login(user);
+
+        assertNotNull(authData);
+        assertEquals(user.username(), authData.username());
+        assertFalse(user.username().isEmpty());
+    }
+
+    @Test
+    void loginWrongUsername() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        var firstUser = new UserData("joe", "toomanysecrets", "j@j.com");
+        var secondUser = new UserData("bob", "notenoughsecrets", "b@b.com");
+        var userService = new UserService(db);
+
+        userService.register(firstUser);
+
+        assertThrows(ErrorException.class, () -> userService.login(secondUser));
+    }
+
+    @Test
+    void loginWrongPassword() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        var firstAttempt = new UserData("joe", "toomanysecrets", "j@j.com");
+        var secondAttempt = new UserData("joe", "notenoughsecrets", "j@j.com");
+        var userService = new UserService(db);
+
+        userService.register(firstAttempt);
+
+        assertThrows(ErrorException.class, () -> userService.login(secondAttempt));
+    }
+
+    @Test
+    void logoutSuccess() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        var user = new UserData("joe", "toomanysecrets", "j@j.com");
+        var userService = new UserService(db);
+
+        var authData = userService.register(user);
+        userService.logout(authData.authToken());
+
+        assertNotNull(authData);
+        assertEquals(user.username(), authData.username());
+        assertFalse(authData.authToken().isEmpty());
+    }
+
+    @Test
+    void logoutTwice() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        var user = new UserData("joe", "toomanysecrets", "j@j.com");
+        var userService = new UserService(db);
+
+        var authData = userService.register(user);
+        userService.logout(authData.authToken());
+
+        assertThrows(ErrorException.class, () -> userService.logout(authData.authToken()));
+    }
 }

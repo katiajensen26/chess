@@ -4,6 +4,7 @@ import dataaccess.DataAccess;
 import model.AuthData;
 import model.UserData;
 import java.util.UUID;
+import service.ErrorException;
 
 public class UserService {
     private final DataAccess dataAccess;
@@ -22,8 +23,9 @@ public class UserService {
         }
         dataAccess.createUser(user);
         var authData = new AuthData(user.username(), generateToken());
+        dataAccess.addAuth(authData);
 
-        return new AuthData(user.username(), generateToken());
+        return authData;
     }
 
     public AuthData login(UserData user) throws ErrorException {
@@ -47,26 +49,16 @@ public class UserService {
     }
 
     //fix this
-    public void logout(String authToken) {
-
+    public void logout(String authToken) throws ErrorException {
         AuthData storedAuth = dataAccess.getAuth(authToken);
+
+        if (storedAuth == null) {
+            throw new ErrorException("Error: unauthorized");
+        }
 
         dataAccess.deleteAuth(authToken);
     }
 
-    public static class ErrorException extends Exception {
-        private final String message;
-
-        public ErrorException(String message) {
-            super(message);
-            this.message = message;
-        }
-
-        public String getMessage () {
-            return String.format("{\"message\": \"%s\"}", message);
-        }
-
-    }
 
     public static String generateToken() {
         return UUID.randomUUID().toString();
