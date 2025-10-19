@@ -3,6 +3,7 @@ package service;
 import dataaccess.DataAccess;
 import model.AuthData;
 import model.UserData;
+import java.util.UUID;
 
 public class UserService {
     private final DataAccess dataAccess;
@@ -20,9 +21,9 @@ public class UserService {
             throw new ErrorException("Error: Already Taken");
         }
         dataAccess.createUser(user);
-        var authData = new AuthData(user.username(), generateAuthToken());
+        var authData = new AuthData(user.username(), generateToken());
 
-        return new AuthData(user.username(), generateAuthToken());
+        return new AuthData(user.username(), generateToken());
     }
 
     public AuthData login(UserData user) throws ErrorException {
@@ -37,15 +38,20 @@ public class UserService {
             throw new ErrorException("Error: unauthorized");
         }
 
+        String authToken = generateToken();
+        AuthData authData = new AuthData(user.username(), authToken);
+        dataAccess.addAuth(authData);
 
-        return new AuthData(user.username(), generateAuthToken());
+        return authData;
 
     }
 
     //fix this
-    public UserData logout(UserData username) {
-        //get auth token, verify they exist first.
-        return username;
+    public void logout(String authToken) {
+
+        AuthData storedAuth = dataAccess.getAuth(authToken);
+
+        dataAccess.deleteAuth(authToken);
     }
 
     public static class ErrorException extends Exception {
@@ -62,8 +68,7 @@ public class UserService {
 
     }
 
-    //replace this with the script from the specs
-    private String generateAuthToken() {
-        return "xyz";
+    public static String generateToken() {
+        return UUID.randomUUID().toString();
     }
 }

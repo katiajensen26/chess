@@ -5,6 +5,7 @@ import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.*;
+import org.eclipse.jetty.server.Authentication;
 import service.UserService;
 
 import java.util.Map;
@@ -74,13 +75,23 @@ public class Server {
         }
     }
 
-    private void logout(Context ctx) {
-
+    private void logout(Context ctx) throws UserService.ErrorException {
         var serializer = new Gson();
-        String reqJson = ctx.header("authorization: <authToken>");
-        var userData = serializer.fromJson(reqJson, UserData.class);
+        String authData = ctx.header("authorization");
 
-        var result = userService.logout(userData);
+        if (authData == null) {
+            throw new UserService.ErrorException("Error: unauthorized");
+        }
+
+        userService.logout(authData);
+        ctx.status(200).result();
+    }
+
+    private void createGame(Context ctx) {
+        var serializer = new Gson();
+        String reqJson = ctx.body();
+        String authData = ctx.header("authorization");
+        var game = serializer.fromJson(reqJson, GameData)
     }
 
     public int run(int desiredPort) {
