@@ -10,7 +10,7 @@ import java.util.Map;
 public class MemoryDataAccess implements DataAccess{
     private final HashMap<String, UserData> users = new HashMap<>();
     private final Map<String, AuthData> authTokens = new HashMap<>();
-    private final Map<String, GameData> games = new HashMap<>();
+    private final Map<Integer, GameData> games = new HashMap<>();
 
 
     @Override
@@ -40,7 +40,7 @@ public class MemoryDataAccess implements DataAccess{
 
     @Override
     public void createGame(GameData gameName) {
-
+        games.put(gameName.gameID(), gameName);
     }
 
     @Override

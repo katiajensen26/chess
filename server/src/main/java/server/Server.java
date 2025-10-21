@@ -30,6 +30,8 @@ public class Server {
 
         server.delete("session", ctx -> logout(ctx));
 
+        server.post("game", ctx -> createGame(ctx));
+
     }
 
     private void register(Context ctx) {
@@ -92,12 +94,23 @@ public class Server {
     }
 
     private void createGame(Context ctx) throws ErrorException {
-        var serializer = new Gson();
-        String reqJson = ctx.body();
-        String authData = ctx.header("authorization");
-        var gameName = serializer.fromJson(reqJson, GameData.class);
+        try {
+            var serializer = new Gson();
+            String reqJson = ctx.body();
+            String authData = ctx.header("authorization");
+            GameData newGame = serializer.fromJson(reqJson, GameData.class);
 
-        gameService.createGame(gameName, authData);
+            if (newGame.gameName() == null) {
+                throw new BadRequestException("Error: bad request");
+            }
+
+            var gameData = gameService.createGame(newGame, authData);
+            ctx.status(200).result(serializer.toJson(gameData));
+        } catch (ErrorException ex) {
+            ctx.status(401).result(ex.getMessage());
+        } catch (BadRequestException e) {
+            ctx.status(400).result(e.getMessage());
+        }
     }
 
     public int run(int desiredPort) {
