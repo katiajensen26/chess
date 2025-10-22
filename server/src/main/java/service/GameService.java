@@ -5,6 +5,9 @@ import dataaccess.DataAccess;
 import model.AuthData;
 import model.GameData;
 
+import java.util.List;
+import java.util.Map;
+
 public class GameService {
     private final DataAccess dataAccess;
     private int gameID = 0;
@@ -26,9 +29,10 @@ public class GameService {
         }
 
         int gameID = newGameID();
-        dataAccess.createGame(newGame);
+        GameData gameToCreate = new GameData(gameID, newGame.whiteUsername(), newGame.blackUsername(), newGame.gameName(), newGame.game(), newGame.playerColor());
+        dataAccess.createGame(gameToCreate);
 
-        return new GameData(gameID, newGame.whiteUsername(), newGame.blackUsername(), newGame.gameName(), new ChessGame(), newGame.playerColor());
+        return new GameData(gameID, gameToCreate.whiteUsername(), gameToCreate.blackUsername(), gameToCreate.gameName(), new ChessGame(), gameToCreate.playerColor());
     }
 
 
@@ -51,6 +55,16 @@ public class GameService {
             return dataAccess.updateGame(updatedGame);
         }
 
+    }
+
+    public List<GameData> listGames(String authToken) throws ErrorException {
+        AuthData storedAuth = dataAccess.getAuth(authToken);
+
+        if (storedAuth == null) {
+            throw new ErrorException("Error: unauthorized");
+        }
+
+        return dataAccess.getGames();
     }
 
     public int newGameID() {

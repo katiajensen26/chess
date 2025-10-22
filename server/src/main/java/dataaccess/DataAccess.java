@@ -2,6 +2,8 @@ package dataaccess;
 
 import model.*;
 
+import java.util.List;
+
 public interface DataAccess {
 
     UserData getUser(String username);
@@ -12,7 +14,7 @@ public interface DataAccess {
     void deleteAuth(String authToken);
     void createGame(GameData gameName);
     GameData getGame(int gameID);
-    GameData listGames(String authToken);
+    List<GameData> getGames();
     GameData updateGame(GameData gameID);
 
 

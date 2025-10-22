@@ -9,6 +9,10 @@ import service.GameService;
 import service.UserService;
 import service.ErrorException;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class Server {
 
     private final Javalin server;
@@ -22,7 +26,7 @@ public class Server {
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
-        server.delete("db", ctx -> ctx.result("{}"));
+        server.delete("db", ctx -> clear(ctx));
 
         server.post("user", ctx -> register(ctx));
 
@@ -36,6 +40,13 @@ public class Server {
 
         server.get("game", ctx -> listGames(ctx));
 
+    }
+
+    private void clear(Context ctx) {
+        userService.clear();
+        gameService.clear();
+
+        ctx.status(200).result("{}");
     }
 
     private void register(Context ctx) {
@@ -138,7 +149,22 @@ public class Server {
         }
     }
 
+    public void listGames(Context ctx) throws ErrorException {
+        try {
+            var serializer = new Gson();
+            String authData = ctx.header("authorization");
+            Map<String, Object> result = new HashMap<>();
 
+            List<GameData> games = gameService.listGames(authData);
+            result.put("games", games);
+
+            ctx.status(200).result(serializer.toJson(result));
+
+        } catch (ErrorException e) {
+            ctx.status(401).result(e.getMessage());
+        }
+
+    }
 
     public int run(int desiredPort) {
         server.start(desiredPort);

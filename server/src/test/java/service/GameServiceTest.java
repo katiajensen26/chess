@@ -6,6 +6,8 @@ import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class GameServiceTest {
@@ -123,4 +125,49 @@ class GameServiceTest {
     }
 
 
+    @Test
+    void listMultipleGames() throws ErrorException {
+        DataAccess db = new MemoryDataAccess();
+        var user = new UserData("joe", "j@J.com", "toomanysecrets");
+        var game1 = new GameData(0, null, null, "ChessGame", null, null);
+        var game2 = new GameData(0, null, null, "ChessGame2", null, null);
+        var game3 = new GameData(0, null, null, "ChessGame3", null, null);
+
+        var userService = new UserService(db);
+        var gameService = new GameService(db);
+
+        var authData = userService.register(user);
+        gameService.createGame(game1, authData.authToken());
+        gameService.createGame(game2, authData.authToken());
+        gameService.createGame(game3, authData.authToken());
+
+        List<GameData> allGames = gameService.listGames(authData.authToken());
+
+        assertNotNull(allGames);
+        assertEquals(3, allGames.size());
+
+    }
+
+    @Test
+    void listUnauthorized() throws ErrorException {
+        DataAccess db = new MemoryDataAccess();
+        var user = new UserData("joe", "j@J.com", "toomanysecrets");
+        var game1 = new GameData(0, null, null, "ChessGame", null, null);
+
+
+        var userService = new UserService(db);
+        var gameService = new GameService(db);
+
+        var authData = userService.register(user);
+        gameService.createGame(game1, authData.authToken());
+        userService.logout(authData.authToken());
+
+        assertThrows(ErrorException.class, () -> gameService.listGames(authData.authToken()));
+
+    }
+
+    @Test
+    void clear() {
+
+    }
 }
