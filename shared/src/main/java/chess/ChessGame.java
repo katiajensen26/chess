@@ -284,7 +284,10 @@ public class ChessGame {
             return false;
         }
         ChessGame chessGame = (ChessGame) o;
-        return currentTeam == chessGame.currentTeam && Objects.equals(board, chessGame.board) && Objects.equals(move, chessGame.move) && Objects.equals(piece, chessGame.piece);
+        return currentTeam == chessGame.currentTeam
+                && Objects.equals(board, chessGame.board)
+                && Objects.equals(move, chessGame.move)
+                && Objects.equals(piece, chessGame.piece);
     }
 
     @Override

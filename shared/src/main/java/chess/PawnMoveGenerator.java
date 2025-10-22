@@ -14,7 +14,12 @@ public class PawnMoveGenerator implements MoveGenerator{
         int startRow = (pawn.getTeamColor() == ChessGame.TeamColor.WHITE) ? 2 : 7;
         int lastRow = (pawn.getTeamColor() == ChessGame.TeamColor.WHITE) ? 8 : 1;
 
-        ChessPiece.PieceType[] promotionTypes = {ChessPiece.PieceType.ROOK, ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.BISHOP};
+        ChessPiece.PieceType[] promotionTypes = {
+                ChessPiece.PieceType.ROOK,
+                ChessPiece.PieceType.QUEEN,
+                ChessPiece.PieceType.KNIGHT,
+                ChessPiece.PieceType.BISHOP
+        };
 
         int currentRow = myPosition.getRow();
         int currentCol = myPosition.getColumn();

@@ -1,12 +1,10 @@
 package service;
 
-import chess.ChessGame;
 import dataaccess.DataAccess;
 import model.AuthData;
 import model.GameData;
 
 import java.util.List;
-import java.util.Map;
 
 public class GameService {
     private final DataAccess dataAccess;
@@ -29,7 +27,12 @@ public class GameService {
         }
 
         int gameID = newGameID();
-        GameData gameToCreate = new GameData(gameID, newGame.whiteUsername(), newGame.blackUsername(), newGame.gameName(), newGame.game(), newGame.playerColor());
+        GameData gameToCreate = new GameData(gameID,
+                newGame.whiteUsername(),
+                newGame.blackUsername(),
+                newGame.gameName(),
+                newGame.game(),
+                newGame.playerColor());
         dataAccess.createGame(gameToCreate);
 
         return gameToCreate;
@@ -47,11 +50,21 @@ public class GameService {
 
         if ("WHITE".equals(gameRequest.playerColor())) {
             if (requestedGame.whiteUsername() != null) {throw new GameTakenException("Error: Game already taken");}
-            GameData updatedGame = new GameData(requestedGame.gameID(), storedAuth.username(), requestedGame.blackUsername(), requestedGame.gameName(), requestedGame.game(), "WHITE");
+            GameData updatedGame = new GameData(requestedGame.gameID(),
+                    storedAuth.username(),
+                    requestedGame.blackUsername(),
+                    requestedGame.gameName(),
+                    requestedGame.game(),
+                    "WHITE");
             return dataAccess.updateGame(updatedGame);
         } else {
             if (requestedGame.blackUsername() != null) {throw new GameTakenException("Error: Game already taken");}
-            GameData updatedGame = new GameData(requestedGame.gameID(), requestedGame.whiteUsername(), storedAuth.username(), requestedGame.gameName(), requestedGame.game(), "BLACK");
+            GameData updatedGame = new GameData(requestedGame.gameID(),
+                    requestedGame.whiteUsername(),
+                    storedAuth.username(),
+                    requestedGame.gameName(),
+                    requestedGame.game(),
+                    "BLACK");
             return dataAccess.updateGame(updatedGame);
         }
 
