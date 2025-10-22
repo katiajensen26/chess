@@ -142,13 +142,21 @@ public class ChessGame {
 
         for (int row = 1; row <= 8; row++) {
             for (int col = 1; col <= 8; col++) {
-                ChessPiece currentPiece = board.getPiece(new ChessPosition(row, col));
-                if (currentPiece != null && currentPiece.getTeamColor() != teamColor) {
-                    for (ChessMove move : possibleLegalMoves(new ChessPosition(row, col))) {
-                        if (move.getEndPosition().equals(kingPosition)) {
-                            return true;
-                        }
-                    }
+                if (checkAttackKing(new ChessPosition(row, col), teamColor, kingPosition)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean checkAttackKing(ChessPosition position, TeamColor team, ChessPosition kingPosition) {
+        ChessPiece piece = board.getPiece(position);
+
+        if (piece != null && piece.getTeamColor() != team) {
+            for (ChessMove move : possibleLegalMoves(position)) {
+                if (move.getEndPosition().equals(kingPosition)) {
+                    return true;
                 }
             }
         }
