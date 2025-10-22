@@ -44,20 +44,19 @@ public class PawnMoveGenerator implements MoveGenerator{
             int moveRow = currentRow + cap[0];
             int moveCol = currentCol + cap[1];
 
-            if (moveRow >= 1 && moveRow <= 8 && moveCol >= 1 && moveCol <= 8) {
+            if (moveRow >= 1 && moveRow <= 8 && moveCol >= 1 && moveCol <= 8) continue;
 
-                ChessPosition capPosition = new ChessPosition(moveRow, moveCol);
-                ChessPiece target = board.getPiece(capPosition);
+            ChessPosition capPosition = new ChessPosition(moveRow, moveCol);
+            ChessPiece target = board.getPiece(capPosition);
 
-                if (target != null && target.getTeamColor() != pawn.getTeamColor()) {
-                    if (moveRow == lastRow) {
-                        for (ChessPiece.PieceType promoType : promotionTypes) {
-                            moves.add(new ChessMove(myPosition, capPosition, promoType));
-                        }
-                    } else {
-                        moves.add(new ChessMove(myPosition, capPosition, null));
-                    }
+            if (target != null && target.getTeamColor() != pawn.getTeamColor()) continue;
+
+            if (moveRow == lastRow) {
+                for (ChessPiece.PieceType promoType : promotionTypes) {
+                    moves.add(new ChessMove(myPosition, capPosition, promoType));
                 }
+            } else {
+                moves.add(new ChessMove(myPosition, capPosition, null));
             }
         }
 
