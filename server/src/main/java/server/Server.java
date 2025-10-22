@@ -32,6 +32,10 @@ public class Server {
 
         server.post("game", ctx -> createGame(ctx));
 
+        server.put("game", ctx -> joinGame(ctx));
+
+        server.get("game", ctx -> listGames(ctx));
+
     }
 
     private void register(Context ctx) {
@@ -112,6 +116,29 @@ public class Server {
             ctx.status(400).result(e.getMessage());
         }
     }
+
+    public void joinGame(Context ctx) throws ErrorException {
+        try {
+            var serializer = new Gson();
+            String reqJson = ctx.body();
+            String authData = ctx.header("authorization");
+            GameData joinReq = serializer.fromJson(reqJson, GameData.class);
+
+            if (joinReq.playerColor() == null) {
+                throw new BadRequestException("Error: bad request");
+            }
+
+            var joinResult = gameService.joinGame(joinReq, authData);
+            ctx.status(200).result(serializer.toJson(joinResult));
+
+        } catch (BadRequestException ex) {
+            ctx.status(400).result(ex.getMessage());
+        } catch (ErrorException e) {
+            ctx.status(401).result(e.getMessage());
+        }
+    }
+
+
 
     public int run(int desiredPort) {
         server.start(desiredPort);

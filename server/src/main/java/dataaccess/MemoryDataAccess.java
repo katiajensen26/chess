@@ -44,8 +44,8 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
-    public GameData getGame(GameData gameID) {
-        return null;
+    public GameData getGame(int gameID) {
+        return games.get(gameID);
     }
 
     @Override
@@ -54,8 +54,9 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
-    public GameData updateGame(GameData gameID) {
-        return null;
+    public GameData updateGame(GameData gameUpdate) {
+        GameData updatedGame = games.replace(gameUpdate.gameID(), gameUpdate);
+        return games.get(updatedGame.gameID());
     }
 
     @Override

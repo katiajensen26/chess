@@ -48,7 +48,6 @@ public class UserService {
 
     }
 
-    //fix this
     public void logout(String authToken) throws ErrorException {
         AuthData storedAuth = dataAccess.getAuth(authToken);
 
