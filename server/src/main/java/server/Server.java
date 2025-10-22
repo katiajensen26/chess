@@ -135,17 +135,23 @@ public class Server {
             String authData = ctx.header("authorization");
             GameData joinReq = serializer.fromJson(reqJson, GameData.class);
 
-            if (joinReq.playerColor() == null) {
+            if (joinReq.gameID() == null) {
                 throw new BadRequestException("Error: bad request");
             }
 
-            var joinResult = gameService.joinGame(joinReq, authData);
-            ctx.status(200).result(serializer.toJson(joinResult));
+            if ("WHITE".equals(joinReq.playerColor())|| "BLACK".equals(joinReq.playerColor())) {
+                var joinResult = gameService.joinGame(joinReq, authData);
+                ctx.status(200).result(serializer.toJson(joinResult));
+            } else {
+                throw new BadRequestException("Error: bad request");
+            }
 
         } catch (BadRequestException ex) {
             ctx.status(400).result(ex.getMessage());
-        } catch (ErrorException e) {
-            ctx.status(401).result(e.getMessage());
+        } catch (GameService.GameTakenException e) {
+            ctx.status(403).result(e.getMessage());
+        } catch (ErrorException x) {
+            ctx.status(401).result(x.getMessage());
         }
     }
 

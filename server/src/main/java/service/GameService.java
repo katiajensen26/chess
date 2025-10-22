@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class GameService {
     private final DataAccess dataAccess;
-    private int gameID = 0;
+    private int gameID = 1;
 
 
     public GameService(DataAccess dataAccess) {
@@ -32,7 +32,7 @@ public class GameService {
         GameData gameToCreate = new GameData(gameID, newGame.whiteUsername(), newGame.blackUsername(), newGame.gameName(), newGame.game(), newGame.playerColor());
         dataAccess.createGame(gameToCreate);
 
-        return new GameData(gameID, gameToCreate.whiteUsername(), gameToCreate.blackUsername(), gameToCreate.gameName(), new ChessGame(), gameToCreate.playerColor());
+        return gameToCreate;
     }
 
 
@@ -46,11 +46,11 @@ public class GameService {
         GameData requestedGame = dataAccess.getGame(gameRequest.gameID());
 
         if ("WHITE".equals(gameRequest.playerColor())) {
-            if (requestedGame.whiteUsername() != null) {throw new ErrorException("Error: Game already taken");}
+            if (requestedGame.whiteUsername() != null) {throw new GameTakenException("Error: Game already taken");}
             GameData updatedGame = new GameData(requestedGame.gameID(), storedAuth.username(), requestedGame.blackUsername(), requestedGame.gameName(), requestedGame.game(), "WHITE");
             return dataAccess.updateGame(updatedGame);
         } else {
-            if (requestedGame.blackUsername() != null) {throw new ErrorException("Error: Game already taken");}
+            if (requestedGame.blackUsername() != null) {throw new GameTakenException("Error: Game already taken");}
             GameData updatedGame = new GameData(requestedGame.gameID(), requestedGame.whiteUsername(), storedAuth.username(), requestedGame.gameName(), requestedGame.game(), "BLACK");
             return dataAccess.updateGame(updatedGame);
         }
@@ -69,5 +69,11 @@ public class GameService {
 
     public int newGameID() {
         return gameID++;
+    }
+
+    public static class GameTakenException extends ErrorException {
+        public GameTakenException(String message) {
+            super(message);
+        }
     }
 }

@@ -167,7 +167,25 @@ class GameServiceTest {
     }
 
     @Test
-    void clear() {
+    void clear() throws ErrorException {
+        DataAccess db = new MemoryDataAccess();
+        var user = new UserData("joe", "j@J.com", "toomanysecrets");
+        var game1 = new GameData(0, null, null, "ChessGame", null, null);
+        var game2 = new GameData(0, null, null, "ChessGame2", null, null);
+        var game3 = new GameData(0, null, null, "ChessGame3", null, null);
 
+        var userService = new UserService(db);
+        var gameService = new GameService(db);
+
+        var authData = userService.register(user);
+        gameService.createGame(game1, authData.authToken());
+        gameService.createGame(game2, authData.authToken());
+        gameService.createGame(game3, authData.authToken());
+
+        gameService.clear();
+
+        List<GameData> gamesAfter = db.getGames();
+
+        assertTrue(gamesAfter.isEmpty());
     }
 }
