@@ -22,6 +22,18 @@ public class SqlDataAccess implements DataAccess {
     //select from user table
     @Override
     public UserData getUser(String username) {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("SELECT username, password, email FROM users WHERE username=?")) {
+                preparedStatement.setString(1, username);
+                try (var rs = preparedStatement.executeQuery()) {
+                    if (rs.next()) {
+                        return new UserData(rs.getString("username"), rs.getString("password"), rs.getString("email"));
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
         return null;
     }
 
@@ -58,7 +70,15 @@ public class SqlDataAccess implements DataAccess {
 
     @Override
     public void addAuth(AuthData authToken) {
-
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("INSERT INTO auth (authToken, username) VALUES (?, ?)")) {
+                preparedStatement.setString(1, authToken.authToken());
+                preparedStatement.setString(2, authToken.username());
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException("Can't insert auth into database.");
+        }
     }
 
     @Override
