@@ -32,4 +32,32 @@ class DataAccessTest {
         db.clear();
         assertNull(db.getUser("joe"));
     }
+
+    @Test
+    void addAuth() {
+    }
+
+    @Test
+    void getAuth() {
+    }
+
+    @Test
+    void deleteAuth() {
+    }
+
+    @Test
+    void createGame() {
+    }
+
+    @Test
+    void getGame() {
+    }
+
+    @Test
+    void getGames() {
+    }
+
+    @Test
+    void updateGame() {
+    }
 }
