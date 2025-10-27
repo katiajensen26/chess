@@ -63,7 +63,6 @@ public class Server {
             var authData = userService.register(user);
             ctx.status(200).result(serializer.toJson(authData));
 
-        //create exception class and figure this out
         } catch (ErrorException ex) {
             ctx.status(403).result(ex.getMessage());
         } catch (BadRequestException e) {

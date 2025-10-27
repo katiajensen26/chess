@@ -4,14 +4,18 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class SqlDataAccess implements DataAccess {
     public SqlDataAccess() {
         try {
             DatabaseManager.createDatabase();
+            createTables();
         } catch (DataAccessException ex){
-            throw new RuntimeException("Error: something is wrong", ex);
+            throw new RuntimeException("Error: database or tables were not made", ex);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -24,12 +28,32 @@ public class SqlDataAccess implements DataAccess {
     //insert into user table
     @Override
     public void createUser(UserData user) {
-
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("INSERT INTO users (username, password, email) VALUES (?, ?, ?)")) {
+                preparedStatement.setString(1, user.username());
+                preparedStatement.setString(2, user.password());
+                preparedStatement.setString(3, user.email());
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException("Can't insert user into database.");
+        }
     }
 
     @Override
     public void clear() {
-
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.createStatement()) {
+                preparedStatement.executeUpdate("DELETE FROM users");
+                preparedStatement.executeUpdate("DELETE FROM auth");
+                preparedStatement.executeUpdate("DELETE FROM games");
+                preparedStatement.executeUpdate("ALTER TABLE games AUTO_INCREMENT = 1");
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -65,5 +89,41 @@ public class SqlDataAccess implements DataAccess {
     @Override
     public GameData updateGame(GameData gameID) {
         return null;
+    }
+
+    private void createTables() throws SQLException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var statement = conn.createStatement()) {
+                statement.executeUpdate("""
+                        CREATE TABLE IF NOT EXISTS users (
+                            username VARCHAR(255) PRIMARY KEY,
+                            password VARCHAR(255) NOT NULL,
+                            email VARCHAR(255) NOT NULL
+                        )
+                """);
+
+                statement.executeUpdate("""
+                        CREATE TABLE IF NOT EXISTS auth (
+                            authToken VARCHAR(255) PRIMARY KEY,
+                            username VARCHAR(255) NOT NULL,
+                            FOREIGN KEY (username) REFERENCES users(username)
+                        )
+               """);
+
+                statement.executeUpdate("""
+                        CREATE TABLE IF NOT EXISTS games(
+                            gameID INT AUTO_INCREMENT PRIMARY KEY,
+                            whiteUsername VARCHAR(255),
+                            blackUsername VARCHAR(255),
+                            gameName VARCHAR(255) NOT NULL,
+                            game VARCHAR(255) NOT NULL,
+                            FOREIGN KEY (whiteUsername) REFERENCES users(username),
+                            FOREIGN KEY (blackUsername) REFERENCES users(username)
+                        )
+                """);
+            }
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Error: tables can't be created", e);
+        }
     }
 }

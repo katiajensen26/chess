@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
 import java.util.UUID;
@@ -17,7 +18,7 @@ public class UserService {
         dataAccess.clear();
     }
 
-    public AuthData register(UserData user) throws ErrorException {
+    public AuthData register(UserData user) throws ErrorException{
         if (dataAccess.getUser(user.username()) != null) {
             throw new ErrorException("Error: Already Taken");
         }
