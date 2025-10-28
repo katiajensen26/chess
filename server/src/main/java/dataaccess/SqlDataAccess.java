@@ -19,7 +19,6 @@ public class SqlDataAccess implements DataAccess {
         }
     }
 
-    //select from user table
     @Override
     public UserData getUser(String username) {
         try (var conn = DatabaseManager.getConnection()) {
@@ -112,7 +111,18 @@ public class SqlDataAccess implements DataAccess {
 
     @Override
     public void createGame(GameData gameName) {
-
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("INSERT INTO games (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)")) {
+                preparedStatement.setInt(1, gameName.gameID());
+                preparedStatement.setString(2, gameName.whiteUsername());
+                preparedStatement.setString(3, gameName.blackUsername());
+                preparedStatement.setString(4, gameName.gameName());
+                preparedStatement.setString(5, gameName.gameName());
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -155,7 +165,7 @@ public class SqlDataAccess implements DataAccess {
                             whiteUsername VARCHAR(255),
                             blackUsername VARCHAR(255),
                             gameName VARCHAR(255) NOT NULL,
-                            game VARCHAR(255) NOT NULL,
+                            game LONGTEXT NOT NULL,
                             FOREIGN KEY (whiteUsername) REFERENCES users(username),
                             FOREIGN KEY (blackUsername) REFERENCES users(username)
                         )
