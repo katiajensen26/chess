@@ -56,8 +56,8 @@ public class SqlDataAccess implements DataAccess {
     public void clear() {
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.createStatement()) {
-                preparedStatement.executeUpdate("DELETE FROM users");
                 preparedStatement.executeUpdate("DELETE FROM auth");
+                preparedStatement.executeUpdate("DELETE FROM users");
                 preparedStatement.executeUpdate("DELETE FROM games");
                 preparedStatement.executeUpdate("ALTER TABLE games AUTO_INCREMENT = 1");
             } catch (SQLException e) {
@@ -100,7 +100,14 @@ public class SqlDataAccess implements DataAccess {
 
     @Override
     public void deleteAuth(String authToken) {
-
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("DELETE FROM auth WHERE authToken=?")) {
+                preparedStatement.setString(1, authToken);
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

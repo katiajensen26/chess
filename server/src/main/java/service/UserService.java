@@ -20,6 +20,10 @@ public class UserService {
         if (dataAccess.getUser(user.username()) != null) {
             throw new ErrorException("Error: Already Taken");
         }
+
+        if (user.username() == null) {
+            throw new ErrorException("Error: invalid username");
+        }
         dataAccess.createUser(user);
         var authData = new AuthData(user.username(), generateToken());
         dataAccess.addAuth(authData);
