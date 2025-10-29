@@ -1,5 +1,6 @@
 package dataaccess;
 
+import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -111,13 +112,13 @@ public class SqlDataAccess implements DataAccess {
 
     @Override
     public void createGame(GameData gameName) {
+        String serializedGame = new Gson().toJson(gameName.game());
         try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("INSERT INTO games (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)")) {
-                preparedStatement.setInt(1, gameName.gameID());
-                preparedStatement.setString(2, gameName.whiteUsername());
-                preparedStatement.setString(3, gameName.blackUsername());
-                preparedStatement.setString(4, gameName.gameName());
-                preparedStatement.setString(5, gameName.gameName());
+            try (var preparedStatement = conn.prepareStatement("INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)")) {
+                preparedStatement.setString(1, gameName.whiteUsername());
+                preparedStatement.setString(2, gameName.blackUsername());
+                preparedStatement.setString(3, gameName.gameName());
+                preparedStatement.setString(4, serializedGame);
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException | DataAccessException e) {
@@ -127,7 +128,19 @@ public class SqlDataAccess implements DataAccess {
 
     @Override
     public GameData getGame(int gameID) {
-        return null;
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("SELECT gameId, whiteUsername, blackUsername, gameName, game FROM games WHERE gameId=?")) {
+                preparedStatement.setInt(1, gameID);
+                try (var rs = preparedStatement.executeQuery()) {
+                    if (rs.next()) {
+                        return new GameData(rs.getInt("gameId"), rs.getString("whiteUsername"), rs.getString("blackUsername"), rs.getString("gameName"), rs.getString("game"));
+
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

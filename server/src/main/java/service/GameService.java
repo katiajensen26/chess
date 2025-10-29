@@ -26,6 +26,7 @@ public class GameService {
             throw new ErrorException("Error: unauthorized");
         }
 
+
         int gameID = newGameID();
         GameData gameToCreate = new GameData(gameID,
                 newGame.whiteUsername(),

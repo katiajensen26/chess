@@ -79,6 +79,8 @@ class DataAccessTest {
 
     @Test
     void createGame() {
+        DataAccess db = new SqlDataAccess();
+
     }
 
     @Test
