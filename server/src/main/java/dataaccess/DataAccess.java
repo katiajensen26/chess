@@ -12,7 +12,7 @@ public interface DataAccess {
     void addAuth(AuthData authToken);
     AuthData getAuth(String authToken);
     void deleteAuth(String authToken);
-    void createGame(GameData gameName);
+    int createGame(GameData gameName);
     GameData getGame(int gameID);
     List<GameData> getGames();
     GameData updateGame(GameData gameID);

@@ -7,6 +7,7 @@ import model.GameData;
 import model.UserData;
 
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 public class SqlDataAccess implements DataAccess {
@@ -112,19 +113,26 @@ public class SqlDataAccess implements DataAccess {
     }
 
     @Override
-    public void createGame(GameData gameName) {
+    public int createGame(GameData gameName) {
         String serializedGame = new Gson().toJson(gameName.game());
         try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)")) {
+            try (var preparedStatement = conn.prepareStatement("INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
                 preparedStatement.setString(1, gameName.whiteUsername());
                 preparedStatement.setString(2, gameName.blackUsername());
                 preparedStatement.setString(3, gameName.gameName());
                 preparedStatement.setString(4, serializedGame);
                 preparedStatement.executeUpdate();
+
+                try (var rs = preparedStatement.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
             }
         } catch (SQLException | DataAccessException e) {
             throw new RuntimeException(e);
         }
+        return 0;
     }
 
     @Override

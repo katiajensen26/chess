@@ -41,8 +41,9 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
-    public void createGame(GameData gameName) {
+    public int createGame(GameData gameName) {
         games.put(gameName.gameID(), gameName);
+        return gameName.gameID();
     }
 
     //toString and fromString function in the game to serialize and deserialize the game.

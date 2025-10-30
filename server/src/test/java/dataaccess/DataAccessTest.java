@@ -1,6 +1,8 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,6 +82,12 @@ class DataAccessTest {
     @Test
     void createGame() {
         DataAccess db = new SqlDataAccess();
+        var game = new GameData(0, null, null, "game1", new ChessGame(), null);
+        var storedGameID = db.createGame(game);
+
+        var dbGame = db.getGame(storedGameID);
+
+        assertEquals(storedGameID, dbGame.gameID());
 
     }
 
