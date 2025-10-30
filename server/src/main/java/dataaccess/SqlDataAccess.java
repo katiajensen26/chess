@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
@@ -129,11 +130,12 @@ public class SqlDataAccess implements DataAccess {
     @Override
     public GameData getGame(int gameID) {
         try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("SELECT gameId, whiteUsername, blackUsername, gameName, game FROM games WHERE gameId=?")) {
+            try (var preparedStatement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games WHERE gameID=?")) {
                 preparedStatement.setInt(1, gameID);
                 try (var rs = preparedStatement.executeQuery()) {
                     if (rs.next()) {
-                        return new GameData(rs.getInt("gameId"), rs.getString("whiteUsername"), rs.getString("blackUsername"), rs.getString("gameName"), rs.getString("game"));
+                        ChessGame deserializedGame = new Gson().fromJson(rs.getString("game"), ChessGame.class);
+                        return new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"), rs.getString("blackUsername"), rs.getString("gameName"), deserializedGame, null);
 
                     }
                 }
@@ -141,6 +143,8 @@ public class SqlDataAccess implements DataAccess {
         } catch (SQLException | DataAccessException e) {
             throw new RuntimeException(e);
         }
+
+        return null;
     }
 
     @Override
