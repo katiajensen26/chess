@@ -8,6 +8,9 @@ import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataAccessTest {
@@ -93,10 +96,30 @@ class DataAccessTest {
 
     @Test
     void getGame() {
+        DataAccess db = new SqlDataAccess();
+        var game = new GameData(0, null, null, "game2", new ChessGame(), null);
+        var storedGameID = db.createGame(game);
+
+        var storedGame = db.getGame(storedGameID);
+
+        assertEquals(storedGameID, storedGame.gameID());
     }
 
     @Test
     void getGames() {
+        DataAccess db = new SqlDataAccess();
+        var game1 = new GameData(0, null, null, "game1", new ChessGame(), null);
+        var game2 = new GameData(0, null, null, "game2", new ChessGame(), null);
+        var game3 = new GameData(0, null, null, "game3", new ChessGame(), null);
+        db.createGame(game1);
+        db.createGame(game2);
+        db.createGame(game3);
+
+        List<GameData> allGames = db.getGames();
+
+        assertNotNull(allGames);
+        assertEquals(3, allGames.size());
+
     }
 
     @Test

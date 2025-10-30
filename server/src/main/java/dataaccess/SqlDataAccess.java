@@ -8,6 +8,7 @@ import model.UserData;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SqlDataAccess implements DataAccess {
@@ -166,12 +167,42 @@ public class SqlDataAccess implements DataAccess {
 
     @Override
     public List<GameData> getGames() {
-        return List.of();
+        var result = new ArrayList<GameData>();
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var prepareStatement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games")) {
+                try (var rs = prepareStatement.executeQuery()) {
+                    while (rs.next()) {
+                        ChessGame deserializedGame = new Gson().fromJson(rs.getString("game"), ChessGame.class);
+                        GameData item = new GameData(
+                                rs.getInt("gameID"),
+                                rs.getString("whiteUsername"),
+                                rs.getString("blackUsername"),
+                                rs.getString("gameName"),
+                                deserializedGame,
+                                null);
+                        result.add(item);
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
     }
 
     @Override
     public GameData updateGame(GameData gameID) {
-        return null;
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("UPDATE games SET whiteUsername=?, blackUsername=? WHERE gameID=?")) {
+                preparedStatement.setString(1, gameID.whiteUsername());
+                preparedStatement.setString(2, gameID.blackUsername());
+                preparedStatement.setInt(3, gameID.gameID());
+                preparedStatement.executeUpdate();
+                return getGame(gameID.gameID());
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void createTables() throws SQLException {
@@ -199,9 +230,7 @@ public class SqlDataAccess implements DataAccess {
                             whiteUsername VARCHAR(255),
                             blackUsername VARCHAR(255),
                             gameName VARCHAR(255) NOT NULL,
-                            game LONGTEXT NOT NULL,
-                            FOREIGN KEY (whiteUsername) REFERENCES users(username),
-                            FOREIGN KEY (blackUsername) REFERENCES users(username)
+                            game LONGTEXT NOT NULL
                         )
                 """);
             }

@@ -13,7 +13,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setup() {
-        DataAccess db = new SqlDataAccess();
+        DataAccess db = new MemoryDataAccess();
         db.clear();
         UserService userService = new UserService(db);
     }
