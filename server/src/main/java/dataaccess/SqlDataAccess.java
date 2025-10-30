@@ -116,7 +116,9 @@ public class SqlDataAccess implements DataAccess {
     public int createGame(GameData gameName) {
         String serializedGame = new Gson().toJson(gameName.game());
         try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+            try (var preparedStatement = conn.prepareStatement(
+                    "INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS)) {
                 preparedStatement.setString(1, gameName.whiteUsername());
                 preparedStatement.setString(2, gameName.blackUsername());
                 preparedStatement.setString(3, gameName.gameName());
@@ -138,12 +140,19 @@ public class SqlDataAccess implements DataAccess {
     @Override
     public GameData getGame(int gameID) {
         try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games WHERE gameID=?")) {
+            try (var preparedStatement = conn.prepareStatement(
+                    "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games WHERE gameID=?")) {
                 preparedStatement.setInt(1, gameID);
                 try (var rs = preparedStatement.executeQuery()) {
                     if (rs.next()) {
                         ChessGame deserializedGame = new Gson().fromJson(rs.getString("game"), ChessGame.class);
-                        return new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"), rs.getString("blackUsername"), rs.getString("gameName"), deserializedGame, null);
+                        return new GameData(
+                                rs.getInt("gameID"),
+                                rs.getString("whiteUsername"),
+                                rs.getString("blackUsername"),
+                                rs.getString("gameName"),
+                                deserializedGame,
+                                null);
 
                     }
                 }
