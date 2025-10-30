@@ -198,7 +198,12 @@ public class SqlDataAccess implements DataAccess {
                 preparedStatement.setString(2, gameID.blackUsername());
                 preparedStatement.setInt(3, gameID.gameID());
                 preparedStatement.executeUpdate();
-                return getGame(gameID.gameID());
+                GameData updatedGame = getGame(gameID.gameID());
+                if (updatedGame != null) {
+                    return updatedGame;
+                } else {
+                    return gameID;
+                }
             }
         } catch (SQLException | DataAccessException e) {
             throw new RuntimeException(e);
