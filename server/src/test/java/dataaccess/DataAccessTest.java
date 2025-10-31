@@ -206,12 +206,12 @@ class DataAccessTest {
         var game = new GameData(0, null, null, "game1", new ChessGame(), null);
         var storedGame = db.createGame(game);
 
-        var GametoUpdate = new GameData(storedGame, "myUsername", null, "game1", new ChessGame(), null);
+        var gameToUpdate = new GameData(storedGame, "myUsername", null, "game1", new ChessGame(), null);
 
-        var updatedGame = db.updateGame(GametoUpdate);
+        var updatedGame = db.updateGame(gameToUpdate);
 
         assertNotNull(updatedGame);
-        assertEquals(GametoUpdate.whiteUsername(), updatedGame.whiteUsername());
+        assertEquals(gameToUpdate.whiteUsername(), updatedGame.whiteUsername());
 
     }
 
