@@ -4,11 +4,9 @@ import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,11 +29,32 @@ class DataAccessTest {
     }
 
     @Test
+    void getUserFailure() throws DataAccessException {
+        DataAccess db = new SqlDataAccess();
+        var user = new UserData("joe", "toomanysecrets", "j@J.com");
+        db.createUser(user);
+
+        UserData result = db.getUser("bob");
+
+        assertNull(result);
+    }
+
+    @Test
     void createUser() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
         var user = new UserData("joe", "toomanysecrets", "j@J.com");
         db.createUser(user);
         assertEquals(user, db.getUser(user.username()));
+    }
+
+    @Test
+    void createUserFailure() throws DataAccessException {
+        DataAccess db = new SqlDataAccess();
+        var user1 = new UserData("joe", "toomanysecrets", "j@J.com");
+        var user2 = new UserData("joe", "notenough", "b@B.com");
+        db.createUser(user1);
+
+        assertThrows(DataAccessException.class, () -> db.createUser(user2));
     }
 
     @Test
@@ -60,6 +79,14 @@ class DataAccessTest {
     }
 
     @Test
+    void addAuthFailure() throws DataAccessException {
+        DataAccess db = new SqlDataAccess();
+        db.createUser(new UserData("joe", "toomanysecrets", "j@J.com"));
+
+        assertThrows(DataAccessException.class, () -> db.addAuth(new AuthData("bob", "token123")));
+    }
+
+    @Test
     void getAuth() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
         var auth = new AuthData("joe", "token123");
@@ -68,6 +95,17 @@ class DataAccessTest {
 
         AuthData storedAuth = db.getAuth("token123");
         assertEquals(auth, storedAuth);
+    }
+
+    @Test
+    void getAuthFailure() throws DataAccessException {
+        DataAccess db = new SqlDataAccess();
+        var auth = new AuthData("joe", "token123");
+        db.createUser(new UserData("joe", "toomanysecrets", "j@J.com"));
+        db.addAuth(auth);
+
+        AuthData storedAuth = db.getAuth("token456");
+        assertNull(storedAuth);
     }
 
     @Test
@@ -83,14 +121,35 @@ class DataAccessTest {
     }
 
     @Test
+    void deleteAuthFailure() throws DataAccessException {
+        DataAccess db = new SqlDataAccess();
+        var auth = new AuthData("joe", "token123");
+        db.createUser(new UserData("joe", "toomanysecrets", "j@J.com"));
+        db.addAuth(auth);
+
+        db.deleteAuth("token234");
+
+        assertNotNull(db.getAuth(auth.authToken()));
+    }
+
+    @Test
     void createGame() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
-        var game = new GameData(0, null, null, "game1", new ChessGame(), null);
-        var storedGameID = db.createGame(game);
+        var game1 = new GameData(0, null, null, "game1", new ChessGame(), null);
+        var storedGameID = db.createGame(game1);
 
         var dbGame = db.getGame(storedGameID);
 
         assertEquals(storedGameID, dbGame.gameID());
+
+    }
+
+    @Test
+    void createGameFailure() throws DataAccessException {
+        DataAccess db = new SqlDataAccess();
+        var game = new GameData(0, null, null, null, new ChessGame(), null);
+
+        assertThrows(DataAccessException.class, () -> db.createGame(game));
 
     }
 
@@ -103,6 +162,15 @@ class DataAccessTest {
         var storedGame = db.getGame(storedGameID);
 
         assertEquals(storedGameID, storedGame.gameID());
+    }
+
+    @Test
+    void getGameFailure() throws DataAccessException {
+        DataAccess db = new SqlDataAccess();
+        var game = new GameData(0, null, null, "game2", new ChessGame(), null);
+        db.createGame(game);
+
+        assertThrows(DataAccessException.class, () -> db.getGame(3));
     }
 
     @Test
@@ -123,6 +191,36 @@ class DataAccessTest {
     }
 
     @Test
-    void updateGame() {
+    void getGamesNoGames() throws DataAccessException {
+        DataAccess db = new SqlDataAccess();
+
+        List<GameData> allGames = db.getGames();
+
+        assertTrue(allGames.isEmpty());
+
+    }
+
+    @Test
+    void updateGame() throws DataAccessException {
+        DataAccess db = new SqlDataAccess();
+        var game = new GameData(0, null, null, "game1", new ChessGame(), null);
+        var storedGame = db.createGame(game);
+
+        var GametoUpdate = new GameData(storedGame, "myUsername", null, "game1", new ChessGame(), null);
+
+        var updatedGame = db.updateGame(GametoUpdate);
+
+        assertNotNull(updatedGame);
+        assertEquals(GametoUpdate.whiteUsername(), updatedGame.whiteUsername());
+
+    }
+
+    @Test
+    void updateGameFailure() throws DataAccessException {
+        DataAccess db = new SqlDataAccess();
+        var gameToUpdate = new GameData(3, "myUsername", null, "game1", new ChessGame(), null);
+        
+        assertThrows(DataAccessException.class, () -> db.updateGame(gameToUpdate));
+
     }
 }

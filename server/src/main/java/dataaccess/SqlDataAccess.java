@@ -155,14 +155,14 @@ public class SqlDataAccess implements DataAccess {
                                 deserializedGame,
                                 null);
 
+                    } else {
+                        throw new DataAccessException("Error: Game not found");
                     }
                 }
             }
         } catch (SQLException | DataAccessException e) {
             throw new DataAccessException("Error: couldn't connect to the database.");
         }
-
-        return null;
     }
 
     @Override
