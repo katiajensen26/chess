@@ -16,13 +16,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class DataAccessTest {
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
         db.clear();
     }
 
     @Test
-    void getUser() {
+    void getUser() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
         var user = new UserData("joe", "toomanysecrets", "j@J.com");
         db.createUser(user);
@@ -31,7 +31,7 @@ class DataAccessTest {
     }
 
     @Test
-    void createUser() {
+    void createUser() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
         var user = new UserData("joe", "toomanysecrets", "j@J.com");
         db.createUser(user);
@@ -39,7 +39,7 @@ class DataAccessTest {
     }
 
     @Test
-    void clear() {
+    void clear() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
         db.createUser(new UserData("joe", "toomanysecrets", "j@J.com"));
         db.clear();
@@ -48,7 +48,7 @@ class DataAccessTest {
     }
 
     @Test
-    void addAuth() {
+    void addAuth() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
         db.createUser(new UserData("joe", "toomanysecrets", "j@J.com"));
         db.addAuth(new AuthData("joe", "token123"));
@@ -60,7 +60,7 @@ class DataAccessTest {
     }
 
     @Test
-    void getAuth() {
+    void getAuth() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
         var auth = new AuthData("joe", "token123");
         db.createUser(new UserData("joe", "toomanysecrets", "j@J.com"));
@@ -71,7 +71,7 @@ class DataAccessTest {
     }
 
     @Test
-    void deleteAuth() {
+    void deleteAuth() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
         var auth = new AuthData("joe", "token123");
         db.createUser(new UserData("joe", "toomanysecrets", "j@J.com"));
@@ -83,7 +83,7 @@ class DataAccessTest {
     }
 
     @Test
-    void createGame() {
+    void createGame() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
         var game = new GameData(0, null, null, "game1", new ChessGame(), null);
         var storedGameID = db.createGame(game);
@@ -95,7 +95,7 @@ class DataAccessTest {
     }
 
     @Test
-    void getGame() {
+    void getGame() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
         var game = new GameData(0, null, null, "game2", new ChessGame(), null);
         var storedGameID = db.createGame(game);
@@ -106,7 +106,7 @@ class DataAccessTest {
     }
 
     @Test
-    void getGames() {
+    void getGames() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
         var game1 = new GameData(0, null, null, "game1", new ChessGame(), null);
         var game2 = new GameData(0, null, null, "game2", new ChessGame(), null);

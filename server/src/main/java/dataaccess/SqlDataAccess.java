@@ -24,7 +24,7 @@ public class SqlDataAccess implements DataAccess {
     }
 
     @Override
-    public UserData getUser(String username) {
+    public UserData getUser(String username) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("SELECT username, password, email FROM users WHERE username=?")) {
                 preparedStatement.setString(1, username);
@@ -35,14 +35,14 @@ public class SqlDataAccess implements DataAccess {
                 }
             }
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException("Error: Can't connect to database", e);
         }
         return null;
     }
 
     //insert into user table
     @Override
-    public void createUser(UserData user) {
+    public void createUser(UserData user) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("INSERT INTO users (username, password, email) VALUES (?, ?, ?)")) {
                 preparedStatement.setString(1, user.username());
@@ -51,12 +51,12 @@ public class SqlDataAccess implements DataAccess {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException("Can't insert user into database.");
+            throw new DataAccessException("Can't insert user into database.");
         }
     }
 
     @Override
-    public void clear() {
+    public void clear() throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.createStatement()) {
                 preparedStatement.executeUpdate("DELETE FROM auth");
@@ -67,12 +67,12 @@ public class SqlDataAccess implements DataAccess {
                 throw new RuntimeException(e);
             }
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException("Error: Couldn't connect to the database.");
         }
     }
 
     @Override
-    public void addAuth(AuthData authToken) {
+    public void addAuth(AuthData authToken) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("INSERT INTO auth (authToken, username) VALUES (?, ?)")) {
                 preparedStatement.setString(1, authToken.authToken());
@@ -80,12 +80,12 @@ public class SqlDataAccess implements DataAccess {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException("Can't insert auth into database.");
+            throw new DataAccessException("Can't insert auth into database.");
         }
     }
 
     @Override
-    public AuthData getAuth(String authToken) {
+    public AuthData getAuth(String authToken) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("SELECT authToken, username FROM auth WHERE authToken=?")) {
                 preparedStatement.setString(1, authToken);
@@ -96,25 +96,25 @@ public class SqlDataAccess implements DataAccess {
                 }
             }
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException("Error: couldn't connect to the database.");
         }
         return null;
     }
 
     @Override
-    public void deleteAuth(String authToken) {
+    public void deleteAuth(String authToken) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("DELETE FROM auth WHERE authToken=?")) {
                 preparedStatement.setString(1, authToken);
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException("Error: couldn't connect to the database.");
         }
     }
 
     @Override
-    public int createGame(GameData gameName) {
+    public int createGame(GameData gameName) throws DataAccessException {
         String serializedGame = new Gson().toJson(gameName.game());
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(
@@ -133,13 +133,13 @@ public class SqlDataAccess implements DataAccess {
                 }
             }
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException("Error: couldn't connect to the database.");
         }
         return 0;
     }
 
     @Override
-    public GameData getGame(int gameID) {
+    public GameData getGame(int gameID) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(
                     "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games WHERE gameID=?")) {
@@ -159,14 +159,14 @@ public class SqlDataAccess implements DataAccess {
                 }
             }
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException("Error: couldn't connect to the database.");
         }
 
         return null;
     }
 
     @Override
-    public List<GameData> getGames() {
+    public List<GameData> getGames() throws DataAccessException {
         var result = new ArrayList<GameData>();
         try (var conn = DatabaseManager.getConnection()) {
             try (var prepareStatement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games")) {
@@ -185,13 +185,13 @@ public class SqlDataAccess implements DataAccess {
                 }
             }
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException("Error: couldn't connect to the database.");
         }
         return result;
     }
 
     @Override
-    public GameData updateGame(GameData gameID) {
+    public GameData updateGame(GameData gameID) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("UPDATE games SET whiteUsername=?, blackUsername=? WHERE gameID=?")) {
                 preparedStatement.setString(1, gameID.whiteUsername());
@@ -206,7 +206,7 @@ public class SqlDataAccess implements DataAccess {
                 }
             }
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException("Error: couldn't connect to the database.");
         }
     }
 

@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import model.GameData;
 import model.UserData;
@@ -13,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class GameServiceTest {
 
     @Test
-    void createGame() throws ErrorException {
+    void createGame() throws ErrorException, DataAccessException {
         DataAccess db = new MemoryDataAccess();
         var user = new UserData("joe", "j@J.com", "toomanysecrets");
         var game = new GameData(0, null, null, "GhessGame", null, null);
@@ -30,7 +31,7 @@ class GameServiceTest {
     }
 
     @Test
-    void createGameUnauthorized() throws ErrorException {
+    void createGameUnauthorized() throws ErrorException, DataAccessException {
         DataAccess db = new MemoryDataAccess();
         var user = new UserData("joe", "j@J.com", "toomanysecrets");
         var game = new GameData(0, null, null, "GhessGame", null, null);
@@ -46,7 +47,7 @@ class GameServiceTest {
 
 
     @Test
-    void joinGameSuccessWhite() throws ErrorException {
+    void joinGameSuccessWhite() throws ErrorException, DataAccessException {
         DataAccess db = new MemoryDataAccess();
         var user = new UserData("joe", "j@J.com", "toomanysecrets");
         var game = new GameData(0, null, null, "GhessGame", null, null);
@@ -67,7 +68,7 @@ class GameServiceTest {
     }
 
     @Test
-    void joinGameSuccessBlack() throws ErrorException {
+    void joinGameSuccessBlack() throws ErrorException, DataAccessException {
         DataAccess db = new MemoryDataAccess();
         var user = new UserData("joe", "j@J.com", "toomanysecrets");
         var game = new GameData(0, null, null, "GhessGame", null, null);
@@ -88,7 +89,7 @@ class GameServiceTest {
     }
 
     @Test
-    void joinGameUnauthorized() throws ErrorException {
+    void joinGameUnauthorized() throws ErrorException, DataAccessException {
         DataAccess db = new MemoryDataAccess();
         var user = new UserData("joe", "j@J.com", "toomanysecrets");
         var game = new GameData(0, null, null, "GhessGame", null, null);
@@ -106,7 +107,7 @@ class GameServiceTest {
     }
 
     @Test
-    void joinGameTaken() throws ErrorException {
+    void joinGameTaken() throws ErrorException, DataAccessException {
         DataAccess db = new MemoryDataAccess();
         var user = new UserData("joe", "j@J.com", "toomanysecrets");
         var secondUser = new UserData("bob", "notenoughsecrets", "b@b.com");
@@ -126,7 +127,7 @@ class GameServiceTest {
 
 
     @Test
-    void listMultipleGames() throws ErrorException {
+    void listMultipleGames() throws ErrorException, DataAccessException {
         DataAccess db = new MemoryDataAccess();
         var user = new UserData("joe", "j@J.com", "toomanysecrets");
         var game1 = new GameData(0, null, null, "ChessGame", null, null);
@@ -149,7 +150,7 @@ class GameServiceTest {
     }
 
     @Test
-    void listUnauthorized() throws ErrorException {
+    void listUnauthorized() throws ErrorException, DataAccessException {
         DataAccess db = new MemoryDataAccess();
         var user = new UserData("joe", "j@J.com", "toomanysecrets");
         var game1 = new GameData(0, null, null, "ChessGame", null, null);
@@ -167,7 +168,7 @@ class GameServiceTest {
     }
 
     @Test
-    void clear() throws ErrorException {
+    void clear() throws ErrorException, DataAccessException {
         DataAccess db = new MemoryDataAccess();
         var user = new UserData("joe", "j@J.com", "toomanysecrets");
         var game1 = new GameData(0, null, null, "ChessGame", null, null);

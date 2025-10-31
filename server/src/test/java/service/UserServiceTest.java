@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import dataaccess.SqlDataAccess;
 import model.UserData;
@@ -12,8 +13,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserServiceTest {
 
     @BeforeEach
-    void setup() {
-        DataAccess db = new MemoryDataAccess();
+    void setup() throws DataAccessException {
+        DataAccess db = new SqlDataAccess();
         db.clear();
         UserService userService = new UserService(db);
     }

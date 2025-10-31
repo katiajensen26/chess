@@ -43,10 +43,14 @@ public class Server {
     }
 
     private void clear(Context ctx) {
-        userService.clear();
-        gameService.clear();
+        try {
+            userService.clear();
+            gameService.clear();
 
-        ctx.status(200).result("{}");
+            ctx.status(200).result("{}");
+        } catch (Exception e) {
+            ctx.status(500).result(e.getMessage());
+        }
     }
 
     private void register(Context ctx) {
@@ -67,6 +71,8 @@ public class Server {
             ctx.status(403).result(ex.getMessage());
         } catch (BadRequestException e) {
             ctx.status(400).result(e.getMessage());
+        } catch (DataAccessException x) {
+            ctx.status(500).result(x.getMessage());
         }
 
 
@@ -89,6 +95,8 @@ public class Server {
             ctx.status(400).result(e.getMessage());
         } catch (ErrorException ex) {
             ctx.status(401).result(ex.getMessage());
+        } catch (DataAccessException x) {
+            ctx.status(500).result(x.getMessage());
         }
     }
 
@@ -104,6 +112,8 @@ public class Server {
             ctx.status(200).result();
         } catch (ErrorException ex){
             ctx.status(401).result(ex.getMessage());
+        } catch (DataAccessException x) {
+            ctx.status(500).result(x.getMessage());
         }
     }
 
@@ -124,6 +134,8 @@ public class Server {
             ctx.status(401).result(ex.getMessage());
         } catch (BadRequestException e) {
             ctx.status(400).result(e.getMessage());
+        } catch (Exception x) {
+            ctx.status(500).result(x.getMessage());
         }
     }
 
@@ -151,6 +163,8 @@ public class Server {
             ctx.status(403).result(e.getMessage());
         } catch (ErrorException x) {
             ctx.status(401).result(x.getMessage());
+        } catch (DataAccessException x) {
+            ctx.status(500).result(x.getMessage());
         }
     }
 
@@ -167,6 +181,8 @@ public class Server {
 
         } catch (ErrorException e) {
             ctx.status(401).result(e.getMessage());
+        } catch (DataAccessException x) {
+            ctx.status(500).result(x.getMessage());
         }
 
     }

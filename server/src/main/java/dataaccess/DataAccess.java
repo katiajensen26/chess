@@ -6,16 +6,16 @@ import java.util.List;
 
 public interface DataAccess {
 
-    UserData getUser(String username);
-    void createUser(UserData user);
-    void clear();
-    void addAuth(AuthData authToken);
-    AuthData getAuth(String authToken);
-    void deleteAuth(String authToken);
-    int createGame(GameData gameName);
-    GameData getGame(int gameID);
-    List<GameData> getGames();
-    GameData updateGame(GameData gameID);
+    UserData getUser(String username) throws DataAccessException;
+    void createUser(UserData user) throws DataAccessException;
+    void clear() throws DataAccessException;
+    void addAuth(AuthData authToken) throws DataAccessException;
+    AuthData getAuth(String authToken) throws DataAccessException;
+    void deleteAuth(String authToken) throws DataAccessException;
+    int createGame(GameData gameName) throws DataAccessException;
+    GameData getGame(int gameID) throws DataAccessException;
+    List<GameData> getGames() throws DataAccessException;
+    GameData updateGame(GameData gameID) throws DataAccessException;
 
 
 }
