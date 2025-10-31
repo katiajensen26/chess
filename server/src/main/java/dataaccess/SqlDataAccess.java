@@ -62,7 +62,7 @@ public class SqlDataAccess implements DataAccess {
                 preparedStatement.executeUpdate("DELETE FROM auth");
                 preparedStatement.executeUpdate("DELETE FROM users");
                 preparedStatement.executeUpdate("DELETE FROM games");
-                preparedStatement.executeUpdate("ALTER TABLE games AUTO_INCREMENT = 1");
+                //preparedStatement.executeUpdate("ALTER TABLE games AUTO_INCREMENT = 1");
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
