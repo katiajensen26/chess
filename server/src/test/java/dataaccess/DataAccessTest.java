@@ -135,8 +135,7 @@ class DataAccessTest {
     @Test
     void createGame() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
-        var game1 = new GameData(0, null, null, "game1", new ChessGame(), null);
-        var storedGameID = db.createGame(game1);
+        var storedGameID = db.createGame("game1");
 
         var dbGame = db.getGame(storedGameID);
 
@@ -147,17 +146,15 @@ class DataAccessTest {
     @Test
     void createGameFailure() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
-        var game = new GameData(0, null, null, null, new ChessGame(), null);
 
-        assertThrows(DataAccessException.class, () -> db.createGame(game));
+        assertThrows(DataAccessException.class, () -> db.createGame(null));
 
     }
 
     @Test
     void getGame() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
-        var game = new GameData(0, null, null, "game2", new ChessGame(), null);
-        var storedGameID = db.createGame(game);
+        var storedGameID = db.createGame("game2");
 
         var storedGame = db.getGame(storedGameID);
 
@@ -167,8 +164,7 @@ class DataAccessTest {
     @Test
     void getGameFailure() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
-        var game = new GameData(0, null, null, "game2", new ChessGame(), null);
-        db.createGame(game);
+        db.createGame("game2");
 
         assertThrows(DataAccessException.class, () -> db.getGame(3));
     }
@@ -176,12 +172,9 @@ class DataAccessTest {
     @Test
     void getGames() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
-        var game1 = new GameData(0, null, null, "game1", new ChessGame(), null);
-        var game2 = new GameData(0, null, null, "game2", new ChessGame(), null);
-        var game3 = new GameData(0, null, null, "game3", new ChessGame(), null);
-        db.createGame(game1);
-        db.createGame(game2);
-        db.createGame(game3);
+        db.createGame("game1");
+        db.createGame("game2");
+        db.createGame("game3");
 
         List<GameData> allGames = db.getGames();
 
@@ -203,8 +196,7 @@ class DataAccessTest {
     @Test
     void updateGame() throws DataAccessException {
         DataAccess db = new SqlDataAccess();
-        var game = new GameData(0, null, null, "game1", new ChessGame(), null);
-        var storedGame = db.createGame(game);
+        var storedGame = db.createGame("game1");
 
         var gameToUpdate = new GameData(storedGame, "myUsername", null, "game1", new ChessGame(), null);
 

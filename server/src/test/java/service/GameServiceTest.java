@@ -3,8 +3,10 @@ package service;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import dataaccess.SqlDataAccess;
 import model.GameData;
 import model.UserData;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -13,35 +15,39 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GameServiceTest {
 
+    @BeforeEach
+    void setup() throws DataAccessException {
+        DataAccess db = new SqlDataAccess();
+        db.clear();
+    }
+
     @Test
     void createGame() throws ErrorException, DataAccessException {
         DataAccess db = new MemoryDataAccess();
         var user = new UserData("joe", "j@J.com", "toomanysecrets");
-        var game = new GameData(0, null, null, "GhessGame", null, null);
         var userService = new UserService(db);
         var gameService = new GameService(db);
 
         var authData = userService.register(user);
-        var gameData = gameService.createGame(game, authData.authToken());
+        var gameData = gameService.createGame("ChessGame", authData.authToken());
         var storedGame = db.getGame(gameData.gameID());
 
         assertNotNull(storedGame);
         assertEquals(gameData.gameID(), storedGame.gameID());
-        assertEquals(gameData.gameName(), storedGame.gameName());
+        assertEquals("ChessGame", storedGame.gameName());
     }
 
     @Test
     void createGameUnauthorized() throws ErrorException, DataAccessException {
         DataAccess db = new MemoryDataAccess();
         var user = new UserData("joe", "j@J.com", "toomanysecrets");
-        var game = new GameData(0, null, null, "GhessGame", null, null);
         var userService = new UserService(db);
         var gameService = new GameService(db);
 
         var authData = userService.register(user);
         userService.logout(authData.authToken());
 
-        assertThrows(ErrorException.class, () -> gameService.createGame(game, authData.authToken()));
+        assertThrows(ErrorException.class, () -> gameService.createGame("ChessGame", authData.authToken()));
     }
 
 
@@ -55,8 +61,8 @@ class GameServiceTest {
         var gameService = new GameService(db);
 
         var authData = userService.register(user);
-        var gameData = gameService.createGame(game, authData.authToken());
-        GameData joinRequest = new GameData(gameData.gameID(), null, null, gameData.gameName(), null, "WHITE");
+        var gameData = gameService.createGame("game", authData.authToken());
+        GameData joinRequest = new GameData(gameData.gameID(), null, null, "game", null, "WHITE");
 
         var joinedGame = gameService.joinGame(joinRequest, authData.authToken());
 
@@ -76,8 +82,8 @@ class GameServiceTest {
         var gameService = new GameService(db);
 
         var authData = userService.register(user);
-        var gameData = gameService.createGame(game, authData.authToken());
-        GameData joinRequest = new GameData(gameData.gameID(), null, null, gameData.gameName(), null, "BLACK");
+        var gameData = gameService.createGame("game", authData.authToken());
+        GameData joinRequest = new GameData(gameData.gameID(), null, null, "game", null, "BLACK");
 
         var joinedGame = gameService.joinGame(joinRequest, authData.authToken());
 
@@ -97,9 +103,9 @@ class GameServiceTest {
         var gameService = new GameService(db);
 
         var authData = userService.register(user);
-        var gameData = gameService.createGame(game, authData.authToken());
+        var gameData = gameService.createGame("game", authData.authToken());
         userService.logout(authData.authToken());
-        GameData joinRequest = new GameData(gameData.gameID(), null, null, gameData.gameName(), null, "BLACK");
+        GameData joinRequest = new GameData(gameData.gameID(), null, null, "game", null, "BLACK");
 
 
         assertThrows(ErrorException.class, () -> gameService.joinGame(joinRequest, authData.authToken()));
@@ -117,8 +123,8 @@ class GameServiceTest {
 
         var authData = userService.register(user);
         var secondAuthData = userService.register(secondUser);
-        var gameData = gameService.createGame(game, authData.authToken());
-        GameData joinRequest = new GameData(gameData.gameID(), null, null, gameData.gameName(), null, "BLACK");
+        var gameData = gameService.createGame("game", authData.authToken());
+        GameData joinRequest = new GameData(gameData.gameID(), null, null, "game", null, "BLACK");
         gameService.joinGame(joinRequest, authData.authToken());
 
         assertThrows(ErrorException.class, () -> gameService.joinGame(joinRequest, secondAuthData.authToken()));
@@ -128,7 +134,7 @@ class GameServiceTest {
 
     @Test
     void listMultipleGames() throws ErrorException, DataAccessException {
-        DataAccess db = new MemoryDataAccess();
+        DataAccess db = new SqlDataAccess();
         var user = new UserData("joe", "j@J.com", "toomanysecrets");
         var game1 = new GameData(0, null, null, "ChessGame", null, null);
         var game2 = new GameData(0, null, null, "ChessGame2", null, null);
@@ -138,9 +144,9 @@ class GameServiceTest {
         var gameService = new GameService(db);
 
         var authData = userService.register(user);
-        gameService.createGame(game1, authData.authToken());
-        gameService.createGame(game2, authData.authToken());
-        gameService.createGame(game3, authData.authToken());
+        gameService.createGame("game1", authData.authToken());
+        gameService.createGame("game2", authData.authToken());
+        gameService.createGame("game3", authData.authToken());
 
         List<GameData> allGames = gameService.listGames(authData.authToken());
 
@@ -153,14 +159,12 @@ class GameServiceTest {
     void listUnauthorized() throws ErrorException, DataAccessException {
         DataAccess db = new MemoryDataAccess();
         var user = new UserData("joe", "j@J.com", "toomanysecrets");
-        var game1 = new GameData(0, null, null, "ChessGame", null, null);
-
 
         var userService = new UserService(db);
         var gameService = new GameService(db);
 
         var authData = userService.register(user);
-        gameService.createGame(game1, authData.authToken());
+        gameService.createGame("game1", authData.authToken());
         userService.logout(authData.authToken());
 
         assertThrows(ErrorException.class, () -> gameService.listGames(authData.authToken()));
@@ -179,9 +183,9 @@ class GameServiceTest {
         var gameService = new GameService(db);
 
         var authData = userService.register(user);
-        gameService.createGame(game1, authData.authToken());
-        gameService.createGame(game2, authData.authToken());
-        gameService.createGame(game3, authData.authToken());
+        gameService.createGame("game1", authData.authToken());
+        gameService.createGame("game2", authData.authToken());
+        gameService.createGame("game3", authData.authToken());
 
         gameService.clear();
 

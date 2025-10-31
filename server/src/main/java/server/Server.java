@@ -122,13 +122,13 @@ public class Server {
             var serializer = new Gson();
             String reqJson = ctx.body();
             String authData = ctx.header("authorization");
-            GameData newGame = serializer.fromJson(reqJson, GameData.class);
+            GameRequest gameRequest = serializer.fromJson(reqJson, GameRequest.class);
 
-            if (newGame.gameName() == null) {
+            if (gameRequest.gameName() == null) {
                 throw new BadRequestException("Error: bad request");
             }
 
-            var gameData = gameService.createGame(newGame, authData);
+            var gameData = gameService.createGame(gameRequest.gameName(), authData);
             ctx.status(200).result(serializer.toJson(gameData));
         } catch (ErrorException ex) {
             ctx.status(401).result(ex.getMessage());

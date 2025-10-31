@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.AuthData;
@@ -24,7 +25,7 @@ public class GameService {
         }
     }
 
-    public GameData createGame(GameData newGame, String authToken) throws ErrorException, DataAccessException {
+    public GameData createGame(String newGame, String authToken) throws ErrorException, DataAccessException {
         try {
             AuthData storedAuth = dataAccess.getAuth(authToken);
 
@@ -32,17 +33,8 @@ public class GameService {
                 throw new ErrorException("Error: unauthorized");
             }
 
-
-            int gameID = newGameID();
-            GameData gameToCreate = new GameData(gameID,
-                    newGame.whiteUsername(),
-                    newGame.blackUsername(),
-                    newGame.gameName(),
-                    newGame.game(),
-                    newGame.playerColor());
-            dataAccess.createGame(gameToCreate);
-
-            return gameToCreate;
+            int gameID = dataAccess.createGame(newGame);
+            return new GameData(gameID, null, null, newGame, new ChessGame(), null);
         } catch (DataAccessException e) {
             throw new DataAccessException("{\"message\": \"Error: failed to connect to database.\"}");
         }

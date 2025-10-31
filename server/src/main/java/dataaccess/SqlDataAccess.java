@@ -62,7 +62,6 @@ public class SqlDataAccess implements DataAccess {
                 preparedStatement.executeUpdate("DELETE FROM auth");
                 preparedStatement.executeUpdate("DELETE FROM users");
                 preparedStatement.executeUpdate("DELETE FROM games");
-                //preparedStatement.executeUpdate("ALTER TABLE games AUTO_INCREMENT = 1");
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -114,16 +113,14 @@ public class SqlDataAccess implements DataAccess {
     }
 
     @Override
-    public int createGame(GameData gameName) throws DataAccessException {
-        String serializedGame = new Gson().toJson(gameName.game());
+    public int createGame(String gameName) throws DataAccessException {
+        String serializedGame = new Gson().toJson(new ChessGame());
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(
-                    "INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)",
+                    "INSERT INTO games (gameName, game) VALUES (?, ?)",
                     Statement.RETURN_GENERATED_KEYS)) {
-                preparedStatement.setString(1, gameName.whiteUsername());
-                preparedStatement.setString(2, gameName.blackUsername());
-                preparedStatement.setString(3, gameName.gameName());
-                preparedStatement.setString(4, serializedGame);
+                preparedStatement.setString(1, gameName);
+                preparedStatement.setString(2, serializedGame);
                 preparedStatement.executeUpdate();
 
                 try (var rs = preparedStatement.getGeneratedKeys()) {

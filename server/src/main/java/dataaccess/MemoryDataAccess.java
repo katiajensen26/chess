@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -41,9 +42,10 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
-    public int createGame(GameData gameName) {
-        games.put(gameName.gameID(), gameName);
-        return gameName.gameID();
+    public int createGame(String gameName) {
+        GameData newGame = new GameData(1, null, null, gameName, new ChessGame(), null);
+        games.put(1, newGame);
+        return newGame.gameID();
     }
 
     //toString and fromString function in the game to serialize and deserialize the game.
