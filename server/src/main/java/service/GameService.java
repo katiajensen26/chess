@@ -93,10 +93,6 @@ public class GameService {
         }
     }
 
-    public int newGameID() {
-        return gameID++;
-    }
-
     public static class GameTakenException extends ErrorException {
         public GameTakenException(String message) {
             super(message);
