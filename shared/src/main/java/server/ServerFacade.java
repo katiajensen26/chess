@@ -24,6 +24,11 @@ public class ServerFacade {
         return handleResponse(response, AuthData.class);
     }
 
+    public AuthData login(UserData user) {
+        var request = buildRequest("POST", "/session", user);
+        var response = sendRequest(request);
+        return handleResponse(response, AuthData.class);
+    }
 
 
     private HttpRequest buildRequest(String method, String path, Object body) {
