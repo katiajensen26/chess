@@ -66,6 +66,15 @@ public class ServerFacadeTests {
         assertTrue(authData.authToken().length() > 10);
     }
 
+    @Test
+    public void loginWrongPassword() {
+        UserData newUser = new UserData("player1", "player1password", "player1@email.com");
+        facade.register(newUser);
+        UserData loginAttempt = new UserData("player1", "wrongpassword", "player1@email.com");
+        assertThrows(ResponseException.class, () -> facade.login(loginAttempt));
+    }
+
+
     @AfterAll
     static void stopServer() {
         server.stop();
