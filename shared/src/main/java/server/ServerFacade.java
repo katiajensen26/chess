@@ -21,7 +21,7 @@ public class ServerFacade {
     public UserData register(UserData newUser) throws IOException, InterruptedException {
         var request = buildRequest("POST", "/user", newUser);
         var response = sendRequest(request);
-        return newUser; //fix this later
+        return handleResponse(response, UserData.class);
     }
 
 
@@ -47,5 +47,23 @@ public class ServerFacade {
 
     private HttpResponse<String> sendRequest(HttpRequest request) throws IOException, InterruptedException {
         return client.send(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) {
+        var status = response.statusCode();
+        if (status / 100 != 2) {
+            var body = response.body();
+            if (body != null) {
+                throw ResponseException.fromJson(body);
+            }
+
+            throw new ResponseException(ResponseException.fromHttpStatus(status), "other failure: " + status);
+        }
+
+        if (responseClass != null) {
+            return new Gson().fromJson(response.body(), responseClass);
+        }
+
+        return null;
     }
 }
