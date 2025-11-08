@@ -18,10 +18,10 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public UserData register(UserData newUser) throws IOException, InterruptedException {
+    public AuthData register(UserData newUser) throws ResponseException {
         var request = buildRequest("POST", "/user", newUser);
         var response = sendRequest(request);
-        return handleResponse(response, UserData.class);
+        return handleResponse(response, AuthData.class);
     }
 
 
@@ -45,8 +45,12 @@ public class ServerFacade {
         }
     }
 
-    private HttpResponse<String> sendRequest(HttpRequest request) throws IOException, InterruptedException {
-        return client.send(request, HttpResponse.BodyHandlers.ofString());
+    private HttpResponse<String> sendRequest(HttpRequest request) throws ResponseException {
+        try {
+            return client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception ex) {
+            throw new ResponseException(ResponseException.StatusCode.ServerError, ex.getMessage());
+        }
     }
 
     private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) {
