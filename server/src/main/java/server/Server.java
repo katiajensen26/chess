@@ -49,7 +49,7 @@ public class Server {
 
             ctx.status(200).result("{}");
         } catch (Exception e) {
-            ctx.status(500).result(e.getMessage());
+            handleError(ctx, e, 500);
         }
     }
 
@@ -70,9 +70,9 @@ public class Server {
         } catch (ErrorException ex) {
             handleError(ctx, ex, 403);
         } catch (BadRequestException e) {
-            ctx.status(400).result(e.getMessage());
+            handleError(ctx, e, 400);
         } catch (DataAccessException x) {
-            ctx.status(500).result(x.getMessage());
+            handleError(ctx, x, 500);
         }
     }
 
@@ -90,11 +90,11 @@ public class Server {
             ctx.status(200).result(serializer.toJson(authData));
 
         } catch (BadRequestException e) {
-            ctx.status(400).result(e.getMessage());
+            handleError(ctx, e, 400);
         } catch (ErrorException ex) {
-            ctx.status(401).result(ex.getMessage());
+            handleError(ctx, ex, 401);
         } catch (DataAccessException x) {
-            ctx.status(500).result(x.getMessage());
+            handleError(ctx, x, 500);
         }
     }
 
@@ -109,9 +109,9 @@ public class Server {
             userService.logout(authData);
             ctx.status(200).result();
         } catch (ErrorException ex){
-            ctx.status(401).result(ex.getMessage());
+            handleError(ctx, ex, 401);
         } catch (DataAccessException x) {
-            ctx.status(500).result(x.getMessage());
+            handleError(ctx, x, 500);
         }
     }
 
@@ -129,11 +129,11 @@ public class Server {
             var gameData = gameService.createGame(gameRequest.gameName(), authData);
             ctx.status(200).result(serializer.toJson(gameData));
         } catch (ErrorException ex) {
-            ctx.status(401).result(ex.getMessage());
+            handleError(ctx, ex, 401);
         } catch (BadRequestException e) {
-            ctx.status(400).result(e.getMessage());
+            handleError(ctx, e, 400);
         } catch (Exception x) {
-            ctx.status(500).result(x.getMessage());
+            handleError(ctx, x, 500);
         }
     }
 
@@ -156,13 +156,13 @@ public class Server {
             }
 
         } catch (BadRequestException ex) {
-            ctx.status(400).result(ex.getMessage());
+            handleError(ctx, ex, 400);
         } catch (GameService.GameTakenException e) {
-            ctx.status(403).result(e.getMessage());
+            handleError(ctx, e, 403);
         } catch (ErrorException x) {
-            ctx.status(401).result(x.getMessage());
+            handleError(ctx, x, 401);
         } catch (DataAccessException x) {
-            ctx.status(500).result(x.getMessage());
+            handleError(ctx, x, 500);
         }
     }
 
@@ -178,14 +178,14 @@ public class Server {
             ctx.status(200).result(serializer.toJson(result));
 
         } catch (ErrorException e) {
-            ctx.status(401).result(e.getMessage());
+            handleError(ctx, e, 401);
         } catch (DataAccessException x) {
-            ctx.status(500).result(x.getMessage());
+            handleError(ctx, x, 500);
         }
 
     }
 
-    public void handleError(Context ctx, ErrorException ex, int statusCode) {
+    public void handleError(Context ctx, Exception ex, int statusCode) {
         var serializer = new Gson();
         HashMap<String, Object> error = new HashMap<>();
         error.put("status", statusCode);
