@@ -3,6 +3,7 @@ package client;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.SqlDataAccess;
+import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.ResponseException;
@@ -81,6 +82,13 @@ public class ServerFacadeTests {
         var authData = facade.login(newUser);
 
         assertDoesNotThrow(() -> facade.logout(authData));
+    }
+
+    @Test
+    public void logoutFailure() {
+        AuthData fakeAuth = new AuthData("player1", "authToken");
+
+        assertThrows(ResponseException.class, () -> facade.logout(fakeAuth));
     }
 
 

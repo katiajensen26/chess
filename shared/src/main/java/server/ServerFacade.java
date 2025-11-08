@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 
 public class ServerFacade {
 
@@ -18,13 +19,13 @@ public class ServerFacade {
     }
 
     public AuthData register(UserData newUser) throws ResponseException {
-        var request = buildRequest("POST", "/user", newUser);
+        var request = buildRequestBody("POST", "/user", newUser);
         var response = sendRequest(request);
         return handleResponse(response, AuthData.class);
     }
 
     public AuthData login(UserData user) {
-        var request = buildRequest("POST", "/session", user);
+        var request = buildRequestBody("POST", "/session", user);
         var response = sendRequest(request);
         return handleResponse(response, AuthData.class);
     }
@@ -39,7 +40,11 @@ public class ServerFacade {
         handleResponse(response, null);
     }
 
-    private HttpRequest buildRequest(String method, String path, Object body) {
+//    public List<GameData> listGames(AuthData authData) {
+//
+//    }
+
+    private HttpRequest buildRequestBody(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
                 .method(method, makeRequestBody(body));
