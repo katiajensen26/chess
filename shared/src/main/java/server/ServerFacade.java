@@ -3,7 +3,6 @@ package server;
 import com.google.gson.Gson;
 import model.*;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -30,6 +29,15 @@ public class ServerFacade {
         return handleResponse(response, AuthData.class);
     }
 
+    public void logout(AuthData authData) {
+        var request = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + "/session"))
+                .DELETE()
+                .setHeader("Authorization", authData.authToken())
+                .build();
+        var response = sendRequest(request);
+        handleResponse(response, null);
+    }
 
     private HttpRequest buildRequest(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()
