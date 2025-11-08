@@ -10,8 +10,6 @@ import java.util.List;
 
 public class GameService {
     private final DataAccess dataAccess;
-    private int gameID = 1;
-
 
     public GameService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
