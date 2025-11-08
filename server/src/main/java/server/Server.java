@@ -42,7 +42,7 @@ public class Server {
 
     }
 
-    private void clear(Context ctx) {
+    public void clear(Context ctx) {
         try {
             userService.clear();
             gameService.clear();
@@ -68,14 +68,12 @@ public class Server {
             ctx.status(200).result(serializer.toJson(authData));
 
         } catch (ErrorException ex) {
-            ctx.status(403).result(ex.getMessage());
+            handleError(ctx, ex, 403);
         } catch (BadRequestException e) {
             ctx.status(400).result(e.getMessage());
         } catch (DataAccessException x) {
             ctx.status(500).result(x.getMessage());
         }
-
-
     }
 
     private void login(Context ctx) {
@@ -185,6 +183,14 @@ public class Server {
             ctx.status(500).result(x.getMessage());
         }
 
+    }
+
+    public void handleError(Context ctx, ErrorException ex, int statusCode) {
+        var serializer = new Gson();
+        HashMap<String, Object> error = new HashMap<>();
+        error.put("status", statusCode);
+        error.put("message", ex.getMessage());
+        ctx.status(statusCode).result(serializer.toJson(error));
     }
 
     public int run(int desiredPort) {

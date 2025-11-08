@@ -27,7 +27,8 @@ public class ResponseException extends RuntimeException {
 
     public static ResponseException fromJson(String json) {
         var map = new Gson().fromJson(json, HashMap.class);
-        var status = StatusCode.valueOf(map.get("status").toString());
+        int code = ((Number) map.get("status")).intValue();
+        var status = fromHttpStatus(code);
         String msg = map.get("message").toString();
         return new ResponseException(status, msg);
     }
@@ -53,6 +54,11 @@ public class ResponseException extends RuntimeException {
             case AlreadyTaken -> 403;
             case ServerError -> 500;
         };
+    }
+
+    private static class ErrorResponse {
+        int status;
+        String message;
     }
 
 }
