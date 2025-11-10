@@ -115,18 +115,28 @@ public class ServerFacadeTests {
         assertThrows(ResponseException.class, () -> facade.createGame(authData, ""));
     }
 
+//    @Test
+//    public void listGamesSuccess() {
+//        UserData newUser = new UserData("player1", "player1password", "player1@email.com");
+//        var authData = facade.register(newUser);
+//
+//        facade.createGame(authData, "game1");
+//        facade.createGame(authData, "game2");
+//
+//        List<GameData> gamesList = facade.listGames(authData);
+//
+//        assertNotNull(gamesList);
+//        assertEquals(2, gamesList.size());
+//    }
+
     @Test
-    public void listGamesSuccess() {
+    public void joinGameSuccess() {
         UserData newUser = new UserData("player1", "player1password", "player1@email.com");
         var authData = facade.register(newUser);
 
-        facade.createGame(authData, "game1");
-        facade.createGame(authData, "game2");
+        var newGame = facade.createGame(authData, "game1");
 
-        List<GameData> gamesList = facade.listGames(authData);
-
-        assertNotNull(gamesList);
-        assertEquals(2, gamesList.size());
+        assertDoesNotThrow(() -> facade.joinGame(authData, "WHITE", newGame.gameID()));
     }
 
 

@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import model.*;
 
@@ -44,22 +45,8 @@ public class ServerFacade {
     }
 
     public List<GameData> listGames(AuthData authData) {
-        var request = HttpRequest.newBuilder()
-                .uri(URI.create(serverUrl + "/game"))
-                .GET()
-                .setHeader("Authorization", authData.authToken())
-                .build();
+        var request = buildRequestWithAuth("GET", "/game", authData, null);
         var response = sendRequest(request);
-
-        if (response.statusCode() / 100 != 2) {
-            var body = response.body();
-            if (body != null) {
-                throw ResponseException.fromJson(body);
-            }
-
-            throw new ResponseException(ResponseException.fromHttpStatus(response.statusCode()), "other failure: " + response.statusCode());
-        }
-
         Type listType = new TypeToken<List<GameData>>(){}.getType();
         return new Gson().fromJson(response.body(), listType);
     }
@@ -69,6 +56,16 @@ public class ServerFacade {
         var request = buildRequestWithAuth("POST", "/game", authData, body);
         var response = sendRequest(request);
         return handleResponse(response, GameData.class);
+    }
+
+    public void joinGame(AuthData authData, String playerColor, int gameId) {
+        JsonObject body = new JsonObject();
+        body.addProperty("playerColor", playerColor);
+        body.addProperty("gameID", gameId);
+
+        var request = buildRequestWithAuth("PUT", "/game", authData, body.toString());
+        var response = sendRequest(request);
+        handleResponse(response, null);
     }
 
     private HttpRequest buildRequestBody(String method, String path, Object body) {
