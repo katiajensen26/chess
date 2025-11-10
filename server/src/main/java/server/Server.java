@@ -122,7 +122,7 @@ public class Server {
             String authData = ctx.header("authorization");
             GameRequest gameRequest = serializer.fromJson(reqJson, GameRequest.class);
 
-            if (gameRequest.gameName() == null) {
+            if (gameRequest.gameName() == null || gameRequest.gameName().isEmpty()) {
                 throw new BadRequestException("Error: bad request");
             }
 

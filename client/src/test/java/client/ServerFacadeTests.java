@@ -94,7 +94,22 @@ public class ServerFacadeTests {
     @Test
     public void createGameSuccess() {
         UserData newUser = new UserData("player1", "player1password", "player1@email.com");
-        facade.register(newUser);
+        var authData = facade.register(newUser);
+
+        var newGame = facade.createGame(authData, "game1");
+
+        assertNotNull(newGame.gameID());
+        assertNotNull(newGame);
+        assertEquals("game1", newGame.gameName());
+    }
+
+    @Test
+    public void createGameFailure() {
+        UserData newUser = new UserData("player1", "player1password", "player1@email.com");
+        var authData = facade.register(newUser);
+
+        assertNotNull(authData);
+        assertThrows(ResponseException.class, () -> facade.createGame(authData, ""));
     }
 
 

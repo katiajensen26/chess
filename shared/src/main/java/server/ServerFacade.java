@@ -10,6 +10,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.Map;
 
 public class ServerFacade {
 
@@ -63,8 +64,9 @@ public class ServerFacade {
         return new Gson().fromJson(response.body(), listType);
     }
 
-    public GameData createGame(AuthData authData) {
-        var request = buildRequestBody("POST", "/game", authData);
+    public GameData createGame(AuthData authData, String gameName) {
+        Map<String, String> body = Map.of("gameName", gameName);
+        var request = buildRequestWithAuth("POST", "/game", authData, body);
         var response = sendRequest(request);
         return handleResponse(response, GameData.class);
     }
@@ -75,6 +77,18 @@ public class ServerFacade {
                 .method(method, makeRequestBody(body));
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
+        }
+
+        return request.build();
+    }
+
+    private HttpRequest buildRequestWithAuth(String method, String path, AuthData authData, Object body) {
+        var request = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + path))
+                .method(method, makeRequestBody(body));
+
+        if (authData != null) {
+            request.setHeader("Authorization", authData.authToken());
         }
 
         return request.build();
