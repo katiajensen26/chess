@@ -1,8 +1,10 @@
 package server;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import model.*;
 
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -40,9 +42,32 @@ public class ServerFacade {
         handleResponse(response, null);
     }
 
-//    public List<GameData> listGames(AuthData authData) {
-//
-//    }
+    public List<GameData> listGames(AuthData authData) {
+        var request = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + "/game"))
+                .GET()
+                .setHeader("Authorization", authData.authToken())
+                .build();
+        var response = sendRequest(request);
+
+        if (response.statusCode() / 100 != 2) {
+            var body = response.body();
+            if (body != null) {
+                throw ResponseException.fromJson(body);
+            }
+
+            throw new ResponseException(ResponseException.fromHttpStatus(response.statusCode()), "other failure: " + response.statusCode());
+        }
+
+        Type listType = new TypeToken<List<GameData>>(){}.getType();
+        return new Gson().fromJson(response.body(), listType);
+    }
+
+    public GameData createGame(AuthData authData) {
+        var request = buildRequestBody("POST", "/game", authData);
+        var response = sendRequest(request);
+        return handleResponse(response, GameData.class);
+    }
 
     private HttpRequest buildRequestBody(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()

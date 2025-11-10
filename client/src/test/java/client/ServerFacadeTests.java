@@ -91,6 +91,12 @@ public class ServerFacadeTests {
         assertThrows(ResponseException.class, () -> facade.logout(fakeAuth));
     }
 
+    @Test
+    public void createGameSuccess() {
+        UserData newUser = new UserData("player1", "player1password", "player1@email.com");
+        facade.register(newUser);
+    }
+
 
     @AfterAll
     static void stopServer() {
