@@ -4,6 +4,7 @@ import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.SqlDataAccess;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.ResponseException;
@@ -12,6 +13,8 @@ import server.ServerFacade;
 import service.ErrorException;
 import service.UserService;
 import service.GameService;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -110,6 +113,20 @@ public class ServerFacadeTests {
 
         assertNotNull(authData);
         assertThrows(ResponseException.class, () -> facade.createGame(authData, ""));
+    }
+
+    @Test
+    public void listGamesSuccess() {
+        UserData newUser = new UserData("player1", "player1password", "player1@email.com");
+        var authData = facade.register(newUser);
+
+        facade.createGame(authData, "game1");
+        facade.createGame(authData, "game2");
+
+        List<GameData> gamesList = facade.listGames(authData);
+
+        assertNotNull(gamesList);
+        assertEquals(2, gamesList.size());
     }
 
 

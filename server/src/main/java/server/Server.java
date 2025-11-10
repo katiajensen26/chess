@@ -182,7 +182,6 @@ public class Server {
         } catch (DataAccessException x) {
             handleError(ctx, x, 500);
         }
-
     }
 
     public void handleError(Context ctx, Exception ex, int statusCode) {
