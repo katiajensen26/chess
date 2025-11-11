@@ -33,10 +33,6 @@ public class ResponseException extends RuntimeException {
         return new ResponseException(status, msg);
     }
 
-    public StatusCode code() {
-        return code;
-    }
-
     public static StatusCode fromHttpStatus(int httpStatusCode) {
         return switch(httpStatusCode) {
             case 400 -> StatusCode.BadRequest;
@@ -44,15 +40,6 @@ public class ResponseException extends RuntimeException {
             case 403 -> StatusCode.AlreadyTaken;
             case 500 -> StatusCode.ServerError;
             default -> throw new IllegalArgumentException("Unknown status code: " + httpStatusCode);
-        };
-    }
-
-    public int httpStatusCode() {
-        return switch(code) {
-            case BadRequest -> 400;
-            case Unauthorized -> 401;
-            case AlreadyTaken -> 403;
-            case ServerError -> 500;
         };
     }
 
