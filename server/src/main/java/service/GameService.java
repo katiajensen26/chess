@@ -5,6 +5,7 @@ import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
+import model.JoinRequest;
 
 import java.util.List;
 
@@ -39,7 +40,7 @@ public class GameService {
     }
 
 
-    public GameData joinGame(GameData gameRequest, String authToken) throws ErrorException, DataAccessException {
+    public GameData joinGame(JoinRequest joinRequest, String authToken) throws ErrorException, DataAccessException {
         try {
             AuthData storedAuth = dataAccess.getAuth(authToken);
 
@@ -47,9 +48,9 @@ public class GameService {
                 throw new ErrorException("Error: unauthorized");
             }
 
-            GameData requestedGame = dataAccess.getGame(gameRequest.gameID());
+            GameData requestedGame = dataAccess.getGame(joinRequest.gameID());
 
-            if ("WHITE".equals(gameRequest.playerColor())) {
+            if ("WHITE".equals(joinRequest.playerColor())) {
                 if (requestedGame.whiteUsername() != null) {
                     throw new GameTakenException("Error: Game already taken");
                 }

@@ -142,7 +142,7 @@ public class Server {
             var serializer = new Gson();
             String reqJson = ctx.body();
             String authData = ctx.header("authorization");
-            GameData joinReq = serializer.fromJson(reqJson, GameData.class);
+            JoinRequest joinReq = serializer.fromJson(reqJson, JoinRequest.class);
 
             if (joinReq.gameID() == null) {
                 throw new BadRequestException("Error: bad request");

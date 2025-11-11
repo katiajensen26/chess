@@ -5,6 +5,7 @@ import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import dataaccess.SqlDataAccess;
 import model.GameData;
+import model.JoinRequest;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,7 +63,7 @@ class GameServiceTest {
 
         var authData = userService.register(user);
         var gameData = gameService.createGame("game", authData.authToken());
-        GameData joinRequest = new GameData(gameData.gameID(), null, null, "game", null, "WHITE");
+        JoinRequest joinRequest = new JoinRequest("WHITE", gameData.gameID());
 
         var joinedGame = gameService.joinGame(joinRequest, authData.authToken());
 
@@ -83,7 +84,7 @@ class GameServiceTest {
 
         var authData = userService.register(user);
         var gameData = gameService.createGame("game", authData.authToken());
-        GameData joinRequest = new GameData(gameData.gameID(), null, null, "game", null, "BLACK");
+        JoinRequest joinRequest = new JoinRequest("BLACK", gameData.gameID());
 
         var joinedGame = gameService.joinGame(joinRequest, authData.authToken());
 
@@ -105,7 +106,7 @@ class GameServiceTest {
         var authData = userService.register(user);
         var gameData = gameService.createGame("game", authData.authToken());
         userService.logout(authData.authToken());
-        GameData joinRequest = new GameData(gameData.gameID(), null, null, "game", null, "BLACK");
+        JoinRequest joinRequest = new JoinRequest("BLACK", gameData.gameID());
 
 
         assertThrows(ErrorException.class, () -> gameService.joinGame(joinRequest, authData.authToken()));
@@ -124,7 +125,7 @@ class GameServiceTest {
         var authData = userService.register(user);
         var secondAuthData = userService.register(secondUser);
         var gameData = gameService.createGame("game", authData.authToken());
-        GameData joinRequest = new GameData(gameData.gameID(), null, null, "game", null, "BLACK");
+        JoinRequest joinRequest = new JoinRequest("WHITE", gameData.gameID());
         gameService.joinGame(joinRequest, authData.authToken());
 
         assertThrows(ErrorException.class, () -> gameService.joinGame(joinRequest, secondAuthData.authToken()));
