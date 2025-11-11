@@ -2,6 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import model.*;
 
@@ -44,11 +45,21 @@ public class ServerFacade {
         handleResponse(response, null);
     }
 
-    public List<GameData> listGames(AuthData authData) {
+    public Map<String, List<GameData>> listGames(AuthData authData) {
         var request = buildRequestWithAuth("GET", "/game", authData, null);
         var response = sendRequest(request);
-        Type listType = new TypeToken<List<GameData>>(){}.getType();
-        return new Gson().fromJson(response.body(), listType);
+
+        Type mapType = new TypeToken<Map<String, List<GameData>>>(){}.getType();
+        var status = response.statusCode();
+        if (status / 100 != 2) {
+            var body = response.body();
+            if (body != null) {
+                throw ResponseException.fromJson(body);
+            }
+
+            throw new ResponseException(ResponseException.fromHttpStatus(status), "other failure: " + status);
+        }
+        return new Gson().fromJson(response.body(), mapType);
     }
 
     public GameData createGame(AuthData authData, String gameName) {
@@ -63,7 +74,7 @@ public class ServerFacade {
         body.addProperty("playerColor", playerColor);
         body.addProperty("gameID", gameId);
 
-        var request = buildRequestWithAuth("PUT", "/game", authData, body.toString());
+        var request = buildRequestWithAuth("PUT", "/game", authData, body);
         var response = sendRequest(request);
         handleResponse(response, null);
     }

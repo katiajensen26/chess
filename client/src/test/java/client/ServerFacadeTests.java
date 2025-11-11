@@ -1,5 +1,7 @@
 package client;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.SqlDataAccess;
@@ -15,6 +17,7 @@ import service.UserService;
 import service.GameService;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -115,19 +118,34 @@ public class ServerFacadeTests {
         assertThrows(ResponseException.class, () -> facade.createGame(authData, ""));
     }
 
-//    @Test
-//    public void listGamesSuccess() {
-//        UserData newUser = new UserData("player1", "player1password", "player1@email.com");
-//        var authData = facade.register(newUser);
-//
-//        facade.createGame(authData, "game1");
-//        facade.createGame(authData, "game2");
-//
-//        List<GameData> gamesList = facade.listGames(authData);
-//
-//        assertNotNull(gamesList);
-//        assertEquals(2, gamesList.size());
-//    }
+    @Test
+    public void listGamesSuccess() {
+        UserData newUser = new UserData("player1", "player1password", "player1@email.com");
+        var authData = facade.register(newUser);
+
+        facade.createGame(authData, "game1");
+        facade.createGame(authData, "game2");
+
+        Map<String, List<GameData>> gamesList = facade.listGames(authData);
+
+        List<GameData> gamesArray = gamesList.get("games");
+
+        assertNotNull(gamesList);
+        assertEquals(2, gamesArray.size());
+    }
+
+    @Test
+    public void listGamesFailure() {
+        UserData newUser = new UserData("player1", "player1password", "player1@email.com");
+        var authData = facade.register(newUser);
+
+        facade.createGame(authData, "game1");
+        facade.createGame(authData, "game2");
+
+        AuthData fakeAuth = new AuthData("player1", "authToken");
+
+        assertThrows(ResponseException.class, () -> facade.listGames(fakeAuth));
+    }
 
     @Test
     public void joinGameSuccess() {
@@ -137,6 +155,17 @@ public class ServerFacadeTests {
         var newGame = facade.createGame(authData, "game1");
 
         assertDoesNotThrow(() -> facade.joinGame(authData, "WHITE", newGame.gameID()));
+    }
+
+    @Test
+    public void joinGameFailure() {
+        UserData newUser = new UserData("player1", "player1password", "player1@email.com");
+        var authData = facade.register(newUser);
+
+        var newGame = facade.createGame(authData, "game1");
+
+        assertThrows(ResponseException.class, () -> facade.joinGame(authData, "BLUE", newGame.gameID()));
+
     }
 
 
