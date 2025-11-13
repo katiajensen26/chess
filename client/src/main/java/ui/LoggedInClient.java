@@ -12,7 +12,8 @@ public class LoggedInClient {
     private final ServerFacade server;
     private State state = State.SIGNEDIN;
     private State gameState = State.NOGAME;
-    private AuthData authData;
+    private final AuthData authData;
+    private Map<Integer, Integer> listToGameId = new HashMap<>();
 
     public LoggedInClient(String serverUrl, AuthData authData) {
         server = new ServerFacade(serverUrl);
@@ -84,6 +85,7 @@ public class LoggedInClient {
             GameData game = games.get(i);
             gamesList.append(String.format("%d. Game name: %s  White: %s  Black: %s%n",
                     i + 1, game.gameName(), game.whiteUsername(), game.blackUsername()));
+            listToGameId.put(i + 1, game.gameID());
         }
         return gamesList.toString();
     }
@@ -101,26 +103,36 @@ public class LoggedInClient {
         if (params.length != 2) {
             throw new ResponseException(ResponseException.StatusCode.BadRequest, "Expected: <GAME ID> <COLOR>");
         }
-        String gameIdString = params[0];
+
+        int chosenGame;
+        try {
+            chosenGame = Integer.parseInt(params[0]);
+        } catch (NumberFormatException e) {
+        throw new ResponseException(ResponseException.StatusCode.BadRequest, "Game ID must be a number.");
+        }
+
+        Integer gameID = listToGameId.get(chosenGame);
         String color = params[1].toUpperCase();
 
-        try {
-            int gameID = Integer.parseInt(gameIdString);
-            server.joinGame(authData, color, gameID);
-        } catch (NumberFormatException e) {
-            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Game ID must be a number.");
-        }
+        server.joinGame(authData, color, gameID);
         gameState = State.INGAME;
-        return String.format("Successfully joined game %s as %s", gameIdString, color);
+        return String.format("Successfully joined game %d as %s", chosenGame, color);
     }
 
     public String watchGame(String... params) {
         if (params.length != 1) {
             throw new ResponseException(ResponseException.StatusCode.BadRequest, "Expected: <GAME ID>");
         }
-        String gameId = params[0];
+        int chosenGame;
+        try {
+            chosenGame = Integer.parseInt(params[0]);
+        } catch (NumberFormatException e) {
+            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Game ID must be a number.");
+        }
+
+        Integer gameId = listToGameId.get(chosenGame);
         gameState = State.INGAME;
-        return String.format("Now observing game %s", gameId);
+        return String.format("Now observing game %d", gameId);
     }
 
     public String logout() {
