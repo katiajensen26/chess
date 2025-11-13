@@ -113,7 +113,11 @@ public class LoggedInClient {
         Integer gameID = pickGame(chosenGame);
         String color = params[1].toUpperCase();
 
-        if (!color.equals("WHITE") || !color.equals("BLACK")) {
+        if (gameID == null) {
+            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Please list games to see game IDs");
+        }
+
+        if (!color.equals("WHITE") && !color.equals("BLACK")) {
             throw new ResponseException(ResponseException.StatusCode.BadRequest, "Please pick white or black");
         }
 
