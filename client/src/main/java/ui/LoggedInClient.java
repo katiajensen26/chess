@@ -67,12 +67,9 @@ public class LoggedInClient {
         } catch (ResponseException ex) {
             String body = ex.getMessage();
 
-            try {
-                var map = new Gson().fromJson(body, HashMap.class);
-                return map.get("message").toString();
-            } catch (Exception e) {
-                return body;
-            }
+            HandleError error = new HandleError(body);
+
+            return error.sendMessage(body);
         }
     }
 
