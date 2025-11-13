@@ -113,6 +113,10 @@ public class LoggedInClient {
         Integer gameID = pickGame(chosenGame);
         String color = params[1].toUpperCase();
 
+        if (!color.equals("WHITE") || !color.equals("BLACK")) {
+            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Please pick white or black");
+        }
+
         server.joinGame(authData, color, gameID);
         gameState = State.INGAME;
         if (color.equals("BLACK")) {
@@ -126,7 +130,10 @@ public class LoggedInClient {
             throw new ResponseException(ResponseException.StatusCode.BadRequest, "Expected: <GAME ID>");
         }
         String chosenGame = params[0];
-        Integer gameId = pickGame(params[0]);
+        Integer gameId = pickGame(chosenGame);
+        if (gameId == null) {
+            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Game doesn't exist.");
+        }
         gameState = State.INGAME;
         return String.format("Now observing game %s", chosenGame);
     }

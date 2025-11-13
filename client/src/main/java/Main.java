@@ -10,14 +10,21 @@ public class Main {
             serverUrl = args[0];
         }
 
-        try {
-            StarterClient starterClient = new StarterClient(serverUrl);
-            starterClient.run();
-            AuthData authData = starterClient.getAuthData();
-            new LoggedInClient(serverUrl, authData).run();
-            new StarterClient(serverUrl).run();
-        } catch (Throwable e) {
-            System.out.printf("Unable to start server: %s%n", e.getMessage());
+        boolean running = true;
+
+        while (running) {
+            try {
+                StarterClient starterClient = new StarterClient(serverUrl);
+                starterClient.run();
+                AuthData authData = starterClient.getAuthData();
+                if (authData == null) {
+                    running = false;
+                } else {
+                    new LoggedInClient(serverUrl, authData).run();
+                }
+            } catch (Throwable e) {
+                System.out.printf("Unable to start server: %s%n", e.getMessage());
+            }
         }
     }
 }
