@@ -104,35 +104,23 @@ public class LoggedInClient {
             throw new ResponseException(ResponseException.StatusCode.BadRequest, "Expected: <GAME ID> <COLOR>");
         }
 
-        int chosenGame;
-        try {
-            chosenGame = Integer.parseInt(params[0]);
-        } catch (NumberFormatException e) {
-        throw new ResponseException(ResponseException.StatusCode.BadRequest, "Game ID must be a number.");
-        }
-
-        Integer gameID = listToGameId.get(chosenGame);
+        String chosenGame = params[0];
+        Integer gameID = pickGame(chosenGame);
         String color = params[1].toUpperCase();
 
         server.joinGame(authData, color, gameID);
         gameState = State.INGAME;
-        return String.format("Successfully joined game %d as %s", chosenGame, color);
+        return String.format("Successfully joined game %s as %s", chosenGame, color);
     }
 
     public String watchGame(String... params) {
         if (params.length != 1) {
             throw new ResponseException(ResponseException.StatusCode.BadRequest, "Expected: <GAME ID>");
         }
-        int chosenGame;
-        try {
-            chosenGame = Integer.parseInt(params[0]);
-        } catch (NumberFormatException e) {
-            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Game ID must be a number.");
-        }
-
-        Integer gameId = listToGameId.get(chosenGame);
+        String chosenGame = params[0];
+        Integer gameId = pickGame(params[0]);
         gameState = State.INGAME;
-        return String.format("Now observing game %d", gameId);
+        return String.format("Now observing game %s", chosenGame);
     }
 
     public String logout() {
@@ -151,6 +139,17 @@ public class LoggedInClient {
                 Logout: "logout"
                 Print this message: "h", "help"
                 """;
+    }
+
+    private Integer pickGame(String gameIdString) {
+        int chosenGame;
+        try {
+            chosenGame = Integer.parseInt(gameIdString);
+        } catch (NumberFormatException e) {
+            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Game ID must be a number.");
+        }
+
+        return listToGameId.get(chosenGame);
     }
 
 }
