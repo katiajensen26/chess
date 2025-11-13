@@ -1,9 +1,13 @@
 package ui;
 
+import com.google.gson.Gson;
+import model.AuthData;
 import model.UserData;
+import server.ResponseException;
 import server.ServerFacade;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
@@ -16,18 +20,21 @@ public class StarterClient {
     }
 
     public void run() {
-        System.out.println("♕ Welcome to Chess! Type help to start");
+        System.out.println(SET_TEXT_COLOR_BLUE + "♕ Welcome to Chess! Type register to start");
         System.out.print(help());
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
-        while (!result.equals("quit") || !result.equals("q")) {
+        while (!result.equals("quit")) {
+            if (state == State.SIGNEDIN) {
+                break;
+            }
             printPrompt();
             String line = scanner.nextLine();
 
             try{
-                eval(line);
-                System.out.print(SET_TEXT_COLOR_BLUE + result);
+                result = eval(line);
+                System.out.print(SET_TEXT_COLOR_WHITE + result);
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
@@ -38,7 +45,7 @@ public class StarterClient {
 
 
     public void printPrompt() {
-        System.out.print("\n" + RESET_TEXT_ITALIC + ">>>" + SET_BG_COLOR_GREEN);
+        System.out.print("\n" + RESET_TEXT_ITALIC + "[LOGGED OUT]>>> ");
     }
 
     public String eval(String input) {
@@ -49,33 +56,47 @@ public class StarterClient {
             return switch (cmd) {
                 case "r", "register" -> register(params);
                 case "l", "login" -> login(params);
-            }
+                case "q", "quit" -> "quit";
+                default -> help();
+            };
+        } catch (ResponseException ex) {
+            String body = ex.getMessage();
+
+            var map = new Gson().fromJson(body, HashMap.class);
+
+            return map.get("message").toString();
         }
     }
 
-    public void register(String... params) {
-        if (params.length >= 1) {
-            String username = params[0];
-            String password = params[1];
-            String email = params[2];
-            var user = new UserData(username, password, email);
-            server.register(user);
-            state = State.SIGNEDIN;
+    public String register(String... params) {
+        if (params.length != 3) {
+            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Expected: <USERNAME> <PASSWORD> <EMAIL>");
         }
+        String username = params[0];
+        String password = params[1];
+        String email = params[2];
+        var user = new UserData(username, password, email);
+        server.register(user);
+        state = State.SIGNEDIN;
+        System.out.print("Successfully registered!");
+        return authData.toString();
     }
 
-    public void login(String... params) {
-        if (params.length >= 1) {
-            String username = params[0];
-            String password = params[1];
-            var user = new UserData(username, password, null);
-            server.login(user);
-            state = State.SIGNEDIN;
+    public String login(String... params) {
+        if (params.length != 2) {
+            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Expected: <USERNAME> <PASSWORD>");
         }
+
+        String username = params[0];
+        String password = params[1];
+        var user = new UserData(username, password, null);
+        server.login(user);
+        state = State.SIGNEDIN;
+        System.out.print("Successfully logged in!");
     }
 
     public String help() {
-        return """
+        return SET_TEXT_COLOR_WHITE + """
                 Options:
                 Login as existing user: "l", "login" <USERNAME> <PASSWORD>
                 Register a new user: "r", "register" <USERNAME> <PASSWORD> <EMAIL>

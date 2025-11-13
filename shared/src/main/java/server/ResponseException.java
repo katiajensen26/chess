@@ -27,10 +27,10 @@ public class ResponseException extends RuntimeException {
 
     public static ResponseException fromJson(String json) {
         var map = new Gson().fromJson(json, HashMap.class);
-        int code = ((Number) map.get("status")).intValue();
-        var status = fromHttpStatus(code);
+//        int code = ((Number) map.get("status")).intValue();
+//        var status = fromHttpStatus(code);
         String msg = map.get("message").toString();
-        return new ResponseException(status, msg);
+        return new ResponseException(StatusCode.BadRequest, msg);
     }
 
     public static StatusCode fromHttpStatus(int httpStatusCode) {
@@ -41,6 +41,11 @@ public class ResponseException extends RuntimeException {
             case 500 -> StatusCode.ServerError;
             default -> throw new IllegalArgumentException("Unknown status code: " + httpStatusCode);
         };
+    }
+
+    public static String getMessageFromJson(String json) {
+        var map = new Gson().fromJson(json, HashMap.class);
+        return map.get("message").toString();
     }
 
     private static class ErrorResponse {

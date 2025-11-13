@@ -2,7 +2,6 @@ package server;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import model.*;
 
@@ -123,7 +122,8 @@ public class ServerFacade {
         if (status / 100 != 2) {
             var body = response.body();
             if (body != null) {
-                throw ResponseException.fromJson(body);
+                String message = ResponseException.getMessageFromJson(body);
+                throw new ResponseException(ResponseException.fromHttpStatus(status), message);
             }
 
             throw new ResponseException(ResponseException.fromHttpStatus(status), "other failure: " + status);
