@@ -12,6 +12,7 @@ public class LoggedInClient {
     private final ServerFacade server;
     private State state = State.SIGNEDIN;
     private State gameState = State.NOGAME;
+    private State colorState = State.WHITE;
     private final AuthData authData;
     private Map<Integer, Integer> listToGameId = new HashMap<>();
 
@@ -28,6 +29,9 @@ public class LoggedInClient {
         while (!result.equals("quit")) {
             if (state == State.SIGNEDOUT) {
                 break;
+            }
+            if (gameState == State.INGAME) {
+                printBoard(colorState);
             }
             printPrompt();
             String line = scanner.nextLine();
@@ -76,7 +80,7 @@ public class LoggedInClient {
         Map<String, List<GameData>> gamesMap = server.listGames(authData);
 
         List<GameData> games = gamesMap.get("games");
-        if (games == null) {
+        if (games == null || games.isEmpty()) {
             return "No games created";
         }
 
@@ -96,7 +100,8 @@ public class LoggedInClient {
         }
         String gameName = params[0];
         server.createGame(authData, gameName);
-        return String.format("Successfully created game: %s", gameName);
+        gameState = State.NOGAME;
+        return String.format("Successfully created game: %s \n List games to see gameID.", gameName);
     }
 
     public String joinGame(String... params) {
@@ -110,6 +115,9 @@ public class LoggedInClient {
 
         server.joinGame(authData, color, gameID);
         gameState = State.INGAME;
+        if (color.equals("BLACK")) {
+            colorState = State.BLACK;
+        }
         return String.format("Successfully joined game %s as %s", chosenGame, color);
     }
 
@@ -126,6 +134,8 @@ public class LoggedInClient {
     public String logout() {
         server.logout(authData);
         state = State.SIGNEDOUT;
+        gameState = State.NOGAME;
+        colorState = State.WHITE;
         return "Successfully logged out.";
     }
 
@@ -141,6 +151,66 @@ public class LoggedInClient {
                 """;
     }
 
+    public void printBoard(State color) {
+        String[][] board = {
+                {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK},
+                {BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN,BLACK_PAWN, BLACK_PAWN},
+                {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                {WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN},
+                {WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK},
+        };
+        System.out.println();
+        if (color == State.BLACK) {
+            printBlackBoard(board);
+        } else {
+            printWhiteBoard(board);
+        }
+        System.out.print(RESET_BG_COLOR + RESET_TEXT_COLOR);
+    }
+
+    public void printWhiteBoard(String[][] board) {
+        System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "     a  b   c  d   e  f   g  h    "
+                + RESET_BG_COLOR);
+        for (int row = 0; row < 8; row++) {
+            System.out.print(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + " " + (8-row) + " ");
+
+            for (int col = 0; col < 8; col++) {
+                String bgColor = (row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
+                String piece = board[row][col];
+
+                System.out.print(bgColor + piece);
+            }
+            System.out.print(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + " " + (8-row) + " " + RESET_BG_COLOR);
+            System.out.println();
+        }
+
+        System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "     a  b   c  d   e  f   g  h    "
+                + RESET_BG_COLOR);
+    }
+
+    public void printBlackBoard(String[][] board) {
+        System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "     h  g   f  e   d  c   b  a    "
+                + RESET_BG_COLOR);
+        for (int row = 7; row >= 0; row--) {
+            System.out.print(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + " " + (8-row) + " ");
+
+            for (int col = 7; col >= 0; col--) {
+                String bgColor = (row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
+                String piece = board[row][col];
+
+                System.out.print(bgColor + piece);
+            }
+            System.out.print(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + " " + (8-row) + " " + RESET_BG_COLOR);
+            System.out.println();
+        }
+
+        System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "     h  g   f  e   d  c   b  a    "
+                + RESET_BG_COLOR);
+    }
+
     private Integer pickGame(String gameIdString) {
         int chosenGame;
         try {
@@ -151,5 +221,4 @@ public class LoggedInClient {
 
         return listToGameId.get(chosenGame);
     }
-
 }
