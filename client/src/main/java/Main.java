@@ -1,4 +1,6 @@
 import chess.*;
+import model.AuthData;
+import ui.LoggedInClient;
 import ui.StarterClient;
 
 public class Main {
@@ -9,6 +11,10 @@ public class Main {
         }
 
         try {
+            StarterClient starterClient = new StarterClient(serverUrl);
+            starterClient.run();
+            AuthData authData = starterClient.getAuthData();
+            new LoggedInClient(serverUrl, authData).run();
             new StarterClient(serverUrl).run();
         } catch (Throwable e) {
             System.out.printf("Unable to start server: %s%n", e.getMessage());

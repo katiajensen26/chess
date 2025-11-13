@@ -14,6 +14,7 @@ import static ui.EscapeSequences.*;
 public class StarterClient {
     private final ServerFacade server;
     private State state = State.SIGNEDOUT;
+    private AuthData authData;
 
     public StarterClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -76,10 +77,9 @@ public class StarterClient {
         String password = params[1];
         String email = params[2];
         var user = new UserData(username, password, email);
-        server.register(user);
+        this.authData = server.register(user);
         state = State.SIGNEDIN;
-        System.out.print("Successfully registered!");
-        return authData.toString();
+        return "Successfully registered!\n";
     }
 
     public String login(String... params) {
@@ -90,9 +90,9 @@ public class StarterClient {
         String username = params[0];
         String password = params[1];
         var user = new UserData(username, password, null);
-        server.login(user);
+        this.authData = server.login(user);
         state = State.SIGNEDIN;
-        System.out.print("Successfully logged in!");
+        return "Successfully logged in!\n";
     }
 
     public String help() {
@@ -103,5 +103,13 @@ public class StarterClient {
                 Exit the program: "q", "quit"
                 Print this message: "h", "help"
                 """;
+    }
+
+    public AuthData getAuthData() {
+        if (state == State.SIGNEDIN) {
+            return authData;
+        } else {
+            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Error: not logged in.");
+        }
     }
 }
