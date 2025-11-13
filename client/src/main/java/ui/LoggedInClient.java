@@ -111,6 +111,7 @@ public class LoggedInClient {
         String color = params[1].toUpperCase();
 
         if (gameID == null) {
+            gameState = State.NOGAME;
             throw new ResponseException(ResponseException.StatusCode.BadRequest, "Please list games to see game IDs");
         }
 
