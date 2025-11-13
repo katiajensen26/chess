@@ -1,17 +1,14 @@
 package client;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.SqlDataAccess;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
-import server.ResponseException;
+import ui.ResponseException;
 import server.Server;
-import server.ServerFacade;
+import ui.ServerFacade;
 import service.ErrorException;
 import service.UserService;
 import service.GameService;

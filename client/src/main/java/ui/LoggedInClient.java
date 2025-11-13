@@ -3,8 +3,6 @@ package ui;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
-import server.ResponseException;
-import server.ServerFacade;
 
 import java.util.*;
 
@@ -45,7 +43,7 @@ public class LoggedInClient {
     }
 
     public void printPrompt() {
-        System.out.print("\n" + RESET_TEXT_ITALIC + "[LOGGED IN]>>>");
+        System.out.print("\n" + RESET_TEXT_ITALIC + "[LOGGED IN]>>> ");
     }
 
     public String eval(String input) {
@@ -64,15 +62,30 @@ public class LoggedInClient {
         } catch (ResponseException ex) {
             String body = ex.getMessage();
 
-            var map = new Gson().fromJson(body, HashMap.class);
-
-            return map.get("message").toString();
+            try {
+                var map = new Gson().fromJson(body, HashMap.class);
+                return map.get("message").toString();
+            } catch (Exception e) {
+                return body;
+            }
         }
     }
 
     public String listGames() {
-        Map<String, List<GameData>> gamesList = server.listGames(authData);
-        return "here's a list";
+        Map<String, List<GameData>> gamesMap = server.listGames(authData);
+
+        List<GameData> games = gamesMap.get("games");
+        if (games == null) {
+            return "No games created";
+        }
+
+        StringBuilder gamesList = new StringBuilder();
+        for (int i = 0; i < games.size(); i++) {
+            GameData game = games.get(i);
+            gamesList.append(String.format("%d. Game name: %s  White: %s  Black: %s%n",
+                    i + 1, game.gameName(), game.whiteUsername(), game.blackUsername()));
+        }
+        return gamesList.toString();
     }
 
     public String createGame(String... params) {
@@ -91,8 +104,12 @@ public class LoggedInClient {
         String gameIdString = params[0];
         String color = params[1].toUpperCase();
 
-        int gameID = Integer.parseInt(gameIdString);
-        server.joinGame(authData, color, gameID);
+        try {
+            int gameID = Integer.parseInt(gameIdString);
+            server.joinGame(authData, color, gameID);
+        } catch (NumberFormatException e) {
+            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Game ID must be a number.");
+        }
         gameState = State.INGAME;
         return String.format("Successfully joined game %s as %s", gameIdString, color);
     }

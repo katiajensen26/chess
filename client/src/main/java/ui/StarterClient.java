@@ -3,8 +3,6 @@ package ui;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.UserData;
-import server.ResponseException;
-import server.ServerFacade;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -63,9 +61,12 @@ public class StarterClient {
         } catch (ResponseException ex) {
             String body = ex.getMessage();
 
-            var map = new Gson().fromJson(body, HashMap.class);
-
-            return map.get("message").toString();
+            try {
+                var map = new Gson().fromJson(body, HashMap.class);
+                return map.get("message").toString();
+            } catch (Exception e) {
+                return body;
+            }
         }
     }
 
