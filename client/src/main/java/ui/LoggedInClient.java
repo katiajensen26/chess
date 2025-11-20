@@ -181,7 +181,7 @@ public class LoggedInClient {
     }
 
     public void printWhiteBoard(String[][] board) {
-        System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "     a  b   c  d   e  f   g  h    "
+        System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "    a  b  c  d  e  f  g  h    "
                 + RESET_BG_COLOR);
         for (int row = 0; row < 8; row++) {
             System.out.print(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + " " + (8-row) + " ");
@@ -190,18 +190,18 @@ public class LoggedInClient {
                 String bgColor = (row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
                 String piece = board[row][col];
 
-                System.out.print(bgColor + piece);
+                System.out.print(bgColor + " " + piece + " ");
             }
             System.out.print(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + " " + (8-row) + " " + RESET_BG_COLOR);
             System.out.println();
         }
 
-        System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "     a  b   c  d   e  f   g  h    "
+        System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "    a  b  c  d  e  f  g  h    "
                 + RESET_BG_COLOR);
     }
 
     public void printBlackBoard(String[][] board) {
-        System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "     h  g   f  e   d  c   b  a    "
+        System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "    h  g  f  e  d  c  b  a    "
                 + RESET_BG_COLOR);
         for (int row = 7; row >= 0; row--) {
             System.out.print(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + " " + (8-row) + " ");
@@ -210,13 +210,13 @@ public class LoggedInClient {
                 String bgColor = (row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
                 String piece = board[row][col];
 
-                System.out.print(bgColor + piece);
+                System.out.print(bgColor + " " + piece + " ");
             }
             System.out.print(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + " " + (8-row) + " " + RESET_BG_COLOR);
             System.out.println();
         }
 
-        System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "     h  g   f  e   d  c   b  a    "
+        System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "    h  g  f  e  d  c  b  a    "
                 + RESET_BG_COLOR);
     }
 
