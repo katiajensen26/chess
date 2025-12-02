@@ -36,8 +36,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             switch (command.getCommandType()) {
                 case CONNECT -> connect(ctx, command);
                 case MAKE_MOVE -> make_move(ctx, command);
-                case LEAVE -> leave(ctx, command);
-                case RESIGN -> resign(ctx, command);
+//                case LEAVE -> leave(ctx, command);
+//                case RESIGN -> resign(ctx, command);
             }
         } catch (IOException e ) {
             System.out.print("Error: failed to parse command.");
@@ -52,9 +52,9 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var gameId = command.getGameID();
         var game = dataAccess.getGame(gameId);
 
-        if (game.whiteUsername().equals(username)) {
+        if (username.equals(game.whiteUsername())) {
             role = "white";
-        } else if (game.blackUsername().equals(username)) {
+        } else if (username.equals(game.blackUsername())) {
             role = "black";
         } else {
             role = "observer";
@@ -62,7 +62,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.add(gameId, session, username);
 
         var loadGame = new LoadGameMessage(game.game());
-        
+        connections.directSend(gameId, session, loadGame);
+
         var message = String.format("%s joined the game as %s!", username, role);
         var notification = new NotificationMessage(message);
         connections.broadcast(session, notification, gameId);
