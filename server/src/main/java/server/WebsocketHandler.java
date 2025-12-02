@@ -9,6 +9,7 @@ import websocket.messages.*;
 import dataaccess.SqlDataAccess;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
@@ -44,16 +45,31 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void connect(WsMessageContext ctx, UserGameCommand command) throws DataAccessException, IOException {
+        String role;
         var session = ctx.session;
         var authData = dataAccess.getAuth(command.getAuthToken());
         var username = authData.username();
-        connections.add(session, username);
-        var message = String.format("%s joined the game as !", username);
+        var gameId = command.getGameID();
+        var game = dataAccess.getGame(gameId);
+
+        if (game.whiteUsername().equals(username)) {
+            role = "white";
+        } else if (game.blackUsername().equals(username)) {
+            role = "black";
+        } else {
+            role = "observer";
+        }
+        connections.add(gameId, session, username);
+
+        var loadGame = new LoadGameMessage(game.game());
+        
+        var message = String.format("%s joined the game as %s!", username, role);
         var notification = new NotificationMessage(message);
-        connections.broadcast(session, notification);
+        connections.broadcast(session, notification, gameId);
     }
 
     private void make_move(WsMessageContext ctx, UserGameCommand command) {
         var session = ctx.session;
+
     }
 }
