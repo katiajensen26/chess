@@ -34,7 +34,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             switch (command.getCommandType()) {
                 case CONNECT -> connect(ctx, command);
-                case MAKE_MOVE -> make_move(ctx, command);
+                case MAKE_MOVE -> makeMove(ctx, command);
 //                case LEAVE -> leave(ctx, command);
 //                case RESIGN -> resign(ctx, command);
             }
@@ -77,7 +77,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void make_move(WsMessageContext ctx, UserGameCommand command) {
+    private void makeMove(WsMessageContext ctx, UserGameCommand command) {
         var session = ctx.session;
 
     }

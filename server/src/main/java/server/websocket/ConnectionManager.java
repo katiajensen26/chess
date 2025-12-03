@@ -43,7 +43,9 @@ public class ConnectionManager {
     public void broadcast(Session excludeSession, ServerMessage message, int gameId) throws IOException {
         Map<Session,String> sessions;
         sessions = connections.get(gameId);
-        if (sessions == null) return;
+        if (sessions == null) {
+            return;
+        }
         Gson gson = new Gson();
         String msg = gson.toJson(message);
         for (Session c : sessions.keySet()) {
