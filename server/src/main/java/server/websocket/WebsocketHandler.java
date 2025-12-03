@@ -225,11 +225,6 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     game.game(),
                     game.playerColor());
         }
-//        } else {
-//            var errorMessage = new ErrorMessage("Can't leave. Sorry.");
-//            connections.directSend(command.getGameID(), session, errorMessage);
-//            return;
-//        }
 
         dataAccess.updateGame(game);
         connections.remove(game.gameID(), session);
