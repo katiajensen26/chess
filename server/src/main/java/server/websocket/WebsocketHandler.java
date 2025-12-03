@@ -171,6 +171,12 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var username = authData.username();
         var game = dataAccess.getGame(command.getGameID());
 
+        if (game.whiteUsername().equals("RESIGNED") || game.blackUsername().equals("RESIGNED")) {
+            var errorMessage = new ErrorMessage("Game has already ended. You can't resign.");
+            connections.directSend(command.getGameID(), session, errorMessage);
+            return;
+        }
+
         if (username.equals(game.whiteUsername())) {
             game = new GameData(game.gameID(),
                     "RESIGNED",
