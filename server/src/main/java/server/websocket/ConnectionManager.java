@@ -1,12 +1,10 @@
-package server;
+package server.websocket;
 
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
-import websocket.*;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,7 +44,8 @@ public class ConnectionManager {
         Map<Session,String> sessions;
         sessions = connections.get(gameId);
         if (sessions == null) return;
-        String msg = message.toString();
+        Gson gson = new Gson();
+        String msg = gson.toJson(message);
         for (Session c : sessions.keySet()) {
             if (c.isOpen()) {
                 if (!c.equals(excludeSession)) {

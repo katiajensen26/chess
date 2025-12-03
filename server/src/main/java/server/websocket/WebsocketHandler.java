@@ -1,4 +1,4 @@
-package server;
+package server.websocket;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
@@ -9,7 +9,6 @@ import websocket.messages.*;
 import dataaccess.SqlDataAccess;
 
 import java.io.IOException;
-import java.util.Objects;
 
 public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
@@ -46,27 +45,36 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void connect(WsMessageContext ctx, UserGameCommand command) throws DataAccessException, IOException {
         String role;
-        var session = ctx.session;
-        var authData = dataAccess.getAuth(command.getAuthToken());
-        var username = authData.username();
-        var gameId = command.getGameID();
-        var game = dataAccess.getGame(gameId);
+        try {
+            var session = ctx.session;
+            var authData = dataAccess.getAuth(command.getAuthToken());
+            if (authData == null) {
+                var errorMessage = new ErrorMessage("User not registered.");
+                connections.directSend(command.getGameID(), session, errorMessage);
+            }
+            var username = authData.username();
+            var gameId = command.getGameID();
+            var game = dataAccess.getGame(gameId);
 
-        if (username.equals(game.whiteUsername())) {
-            role = "white";
-        } else if (username.equals(game.blackUsername())) {
-            role = "black";
-        } else {
-            role = "observer";
+            if (username.equals(game.whiteUsername())) {
+                role = "white";
+            } else if (username.equals(game.blackUsername())) {
+                role = "black";
+            } else {
+                role = "observer";
+            }
+            connections.add(gameId, session, username);
+
+            var loadGame = new LoadGameMessage(game.game());
+            connections.directSend(gameId, session, loadGame);
+
+            var message = String.format("%s joined the game as %s!", username, role);
+            var notification = new NotificationMessage(message);
+            connections.broadcast(session, notification, gameId);
+        } catch (DataAccessException e) {
+            var error = new ErrorMessage(e.getMessage());
+            connections.directSend(command.getGameID(), ctx.session, error);
         }
-        connections.add(gameId, session, username);
-
-        var loadGame = new LoadGameMessage(game.game());
-        connections.directSend(gameId, session, loadGame);
-
-        var message = String.format("%s joined the game as %s!", username, role);
-        var notification = new NotificationMessage(message);
-        connections.broadcast(session, notification, gameId);
     }
 
     private void make_move(WsMessageContext ctx, UserGameCommand command) {

@@ -5,6 +5,7 @@ import dataaccess.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.*;
+import server.websocket.WebsocketHandler;
 import service.GameService;
 import service.UserService;
 import service.ErrorException;
