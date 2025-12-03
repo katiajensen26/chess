@@ -38,7 +38,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             switch (command.getCommandType()) {
                 case CONNECT -> connect(ctx, command);
                 case MAKE_MOVE -> makeMove(ctx, command);
-//                case LEAVE -> leave(ctx, command);
+                case LEAVE -> leave(ctx, command);
                 case RESIGN -> resign(ctx, command);
             }
         } catch (IOException e ) {
@@ -202,5 +202,39 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var message = String.format("%s has resigned. Game is over!", username);
         var notification = new NotificationMessage(message);
         connections.broadcast(null, notification, command.getGameID());
+    }
+
+    private void leave(WsMessageContext ctx, UserGameCommand command) throws DataAccessException, IOException {
+        var session = ctx.session;
+        var authData = dataAccess.getAuth(command.getAuthToken());
+        var username = authData.username();
+        var game = dataAccess.getGame(command.getGameID());
+
+        if (username.equals(game.whiteUsername())) {
+            game = new GameData(game.gameID(),
+                    null,
+                    game.blackUsername(),
+                    game.gameName(),
+                    game.game(),
+                    game.playerColor());
+        } else if (username.equals(game.blackUsername())) {
+            game = new GameData(game.gameID(),
+                    game.whiteUsername(),
+                    null,
+                    game.gameName(),
+                    game.game(),
+                    game.playerColor());
+        }
+//        } else {
+//            var errorMessage = new ErrorMessage("Can't leave. Sorry.");
+//            connections.directSend(command.getGameID(), session, errorMessage);
+//            return;
+//        }
+
+        dataAccess.updateGame(game);
+        connections.remove(game.gameID(), session);
+        var message = String.format("%s has left the game.", username);
+        var notification = new NotificationMessage(message);
+        connections.broadcast(session, notification, game.gameID());
     }
 }
