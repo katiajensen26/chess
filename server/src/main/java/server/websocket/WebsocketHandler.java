@@ -39,7 +39,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case CONNECT -> connect(ctx, command);
                 case MAKE_MOVE -> makeMove(ctx, command);
 //                case LEAVE -> leave(ctx, command);
-//                case RESIGN -> resign(ctx, command);
+                case RESIGN -> resign(ctx, command);
             }
         } catch (IOException e ) {
             System.out.print("Error: failed to parse command.");
@@ -113,6 +113,12 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             opponentUsername = game.blackUsername();
         }
 
+        if (game.whiteUsername().equals("RESIGNED") || game.blackUsername().equals("RESIGNED")) {
+            var errorMessage = new ErrorMessage("Game is over. No moves can be made.");
+            connections.directSend(command.getGameID(), session, errorMessage);
+            return;
+        }
+
         if (playerColor.equals(chessGame.getTeamTurn())) {
             try {
                 chessGame.makeMove(move);
@@ -157,5 +163,38 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var notification = new NotificationMessage(message);
         connections.broadcast(session, notification, game.gameID());
 
+    }
+
+    private void resign(WsMessageContext ctx, UserGameCommand command) throws DataAccessException, IOException {
+        var session = ctx.session;
+        var authData = dataAccess.getAuth(command.getAuthToken());
+        var username = authData.username();
+        var game = dataAccess.getGame(command.getGameID());
+
+        if (username.equals(game.whiteUsername())) {
+            game = new GameData(game.gameID(),
+                    "RESIGNED",
+                    game.blackUsername(),
+                    game.gameName(),
+                    game.game(),
+                    game.playerColor());
+        } else if (username.equals(game.blackUsername())) {
+            game = new GameData(game.gameID(),
+                    game.whiteUsername(),
+                    "RESIGNED",
+                    game.gameName(),
+                    game.game(),
+                    game.playerColor());
+        } else {
+            var errorMessage = new ErrorMessage("Sorry, you can't resign.");
+            connections.directSend(command.getGameID(), session, errorMessage);
+            return;
+        }
+
+        dataAccess.updateGame(game);
+
+        var message = String.format("%s has resigned. Game is over!", username);
+        var notification = new NotificationMessage(message);
+        connections.broadcast(null, notification, command.getGameID());
     }
 }
