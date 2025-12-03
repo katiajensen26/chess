@@ -1,12 +1,16 @@
 package server.websocket;
 
+import chess.ChessPosition;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.websocket.*;
 import org.jetbrains.annotations.NotNull;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.*;
 import dataaccess.SqlDataAccess;
+import chess.ChessGame;
 
 import java.io.IOException;
 
@@ -43,7 +47,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void connect(WsMessageContext ctx, UserGameCommand command) throws DataAccessException, IOException {
+    private void connect(WsMessageContext ctx, UserGameCommand command) throws IOException {
         String role;
         try {
             var session = ctx.session;
@@ -77,8 +81,41 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void makeMove(WsMessageContext ctx, UserGameCommand command) {
+    private void makeMove(WsMessageContext ctx, UserGameCommand command) throws DataAccessException, IOException, InvalidMoveException {
         var session = ctx.session;
+        var game = dataAccess.getGame(command.getGameID());
+        ChessGame chessGame = game.game();
+        var authData = dataAccess.getAuth(command.getAuthToken());
+        var username = authData.username();
+        var playerColor = ChessGame.TeamColor.WHITE;
+        var move = ((MakeMoveCommand) command).getMove();
+
+        if (username.equals(game.whiteUsername())) {
+            playerColor = ChessGame.TeamColor.WHITE;
+        } else if (username.equals(game.blackUsername())) {
+            playerColor = ChessGame.TeamColor.BLACK;
+        } else {
+            var errorMessage = new ErrorMessage("You are not a player. You can't make a move.");
+            connections.directSend(command.getGameID(), session, errorMessage);
+            return;
+        }
+
+        if (playerColor.equals(chessGame.getTeamTurn())) {
+            chessGame.makeMove(move);
+        } else {
+            var errorMessage = new ErrorMessage("It is not your turn.");
+            connections.directSend(command.getGameID(), session, errorMessage);
+            return;
+        }
+
+        dataAccess.updateGame(game);
+
+        var loadGameMessage = new LoadGameMessage(game.game());
+        connections.broadcast(null, loadGameMessage, game.gameID());
+
+        var message = String.format("%s made move: %s", username, move);
+        var notification = new NotificationMessage(message);
+        connections.broadcast(session, notification, game.gameID());
 
     }
 }
