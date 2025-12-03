@@ -189,11 +189,14 @@ public class SqlDataAccess implements DataAccess {
 
     @Override
     public GameData updateGame(GameData gameID) throws DataAccessException {
+        Gson gson = new Gson();
+        String serializedGame = gson.toJson(gameID.game());
         try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("UPDATE games SET whiteUsername=?, blackUsername=? WHERE gameID=?")) {
+            try (var preparedStatement = conn.prepareStatement("UPDATE games SET whiteUsername=?, blackUsername=?, game=? WHERE gameID=?")) {
                 preparedStatement.setString(1, gameID.whiteUsername());
                 preparedStatement.setString(2, gameID.blackUsername());
-                preparedStatement.setInt(3, gameID.gameID());
+                preparedStatement.setString(3, serializedGame);
+                preparedStatement.setInt(4, gameID.gameID());
                 preparedStatement.executeUpdate();
                 GameData updatedGame = getGame(gameID.gameID());
                 if (updatedGame != null) {
