@@ -1,12 +1,10 @@
 package server.websocket;
 
-import chess.ChessPosition;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.websocket.*;
 import org.jetbrains.annotations.NotNull;
-import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.*;
 import dataaccess.SqlDataAccess;
@@ -86,6 +84,11 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var game = dataAccess.getGame(command.getGameID());
         ChessGame chessGame = game.game();
         var authData = dataAccess.getAuth(command.getAuthToken());
+        if (authData == null) {
+            var errorMessage = new ErrorMessage("User not registered.");
+            connections.directSend(command.getGameID(), session, errorMessage);
+            return;
+        }
         var username = authData.username();
         var playerColor = ChessGame.TeamColor.WHITE;
         var move = command.getMove();
@@ -101,7 +104,13 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
 
         if (playerColor.equals(chessGame.getTeamTurn())) {
-            chessGame.makeMove(move);
+            try {
+                chessGame.makeMove(move);
+            } catch (InvalidMoveException e) {
+                var errorMessage = new ErrorMessage("Invalid move.");
+                connections.directSend(command.getGameID(), session, errorMessage);
+                return;
+            }
         } else {
             var errorMessage = new ErrorMessage("It is not your turn.");
             connections.directSend(command.getGameID(), session, errorMessage);
