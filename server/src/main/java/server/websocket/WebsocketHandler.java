@@ -4,6 +4,7 @@ import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.websocket.*;
+import model.GameData;
 import org.jetbrains.annotations.NotNull;
 import websocket.commands.UserGameCommand;
 import websocket.messages.*;
@@ -103,6 +104,15 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             return;
         }
 
+        String opponentUsername;
+
+        var opponent = (playerColor == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
+        if (opponent.equals(ChessGame.TeamColor.WHITE)) {
+            opponentUsername = game.whiteUsername();
+        } else {
+            opponentUsername = game.blackUsername();
+        }
+
         if (playerColor.equals(chessGame.getTeamTurn())) {
             try {
                 chessGame.makeMove(move);
@@ -117,19 +127,26 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             return;
         }
 
-        if (chessGame.isInStalemate(playerColor)) {
-            var message = String.format("%s is in stalemate!", username);
+        if (chessGame.isInCheckmate(opponent)) {
+            var message = String.format("%s is in checkmate!", opponentUsername);
             var notification = new NotificationMessage(message);
             connections.broadcast(null, notification, game.gameID());
-        } else if (chessGame.isInCheck(playerColor)) {
-            var message = String.format("%s is in check!", username);
+        } else if (chessGame.isInStalemate(opponent)) {
+            var message = String.format("%s is in stalemate!", opponentUsername);
             var notification = new NotificationMessage(message);
             connections.broadcast(null, notification, game.gameID());
-        } else if (chessGame.isInCheckmate(playerColor)) {
-            var message = String.format("%s is in checkmate!", username);
+        } else if (chessGame.isInCheck(opponent)) {
+            var message = String.format("%s is in check!", opponentUsername);
             var notification = new NotificationMessage(message);
             connections.broadcast(null, notification, game.gameID());
         }
+
+        game = new GameData(game.gameID(),
+                game.whiteUsername(),
+                game.blackUsername(),
+                game.gameName(),
+                chessGame,
+                game.playerColor());
 
         dataAccess.updateGame(game);
 
