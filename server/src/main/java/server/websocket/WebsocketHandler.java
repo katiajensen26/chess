@@ -88,7 +88,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var authData = dataAccess.getAuth(command.getAuthToken());
         var username = authData.username();
         var playerColor = ChessGame.TeamColor.WHITE;
-        var move = ((MakeMoveCommand) command).getMove();
+        var move = command.getMove();
 
         if (username.equals(game.whiteUsername())) {
             playerColor = ChessGame.TeamColor.WHITE;
@@ -106,6 +106,20 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             var errorMessage = new ErrorMessage("It is not your turn.");
             connections.directSend(command.getGameID(), session, errorMessage);
             return;
+        }
+
+        if (chessGame.isInStalemate(playerColor)) {
+            var message = String.format("%s is in stalemate!", username);
+            var notification = new NotificationMessage(message);
+            connections.broadcast(null, notification, game.gameID());
+        } else if (chessGame.isInCheck(playerColor)) {
+            var message = String.format("%s is in check!", username);
+            var notification = new NotificationMessage(message);
+            connections.broadcast(null, notification, game.gameID());
+        } else if (chessGame.isInCheckmate(playerColor)) {
+            var message = String.format("%s is in checkmate!", username);
+            var notification = new NotificationMessage(message);
+            connections.broadcast(null, notification, game.gameID());
         }
 
         dataAccess.updateGame(game);
