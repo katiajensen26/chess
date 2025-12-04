@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
@@ -15,6 +16,8 @@ public class LoggedInClient {
     private State colorState = State.WHITE;
     private final AuthData authData;
     private Map<Integer, Integer> listToGameId = new HashMap<>();
+    private Map<Integer, GameData> individualGames = new HashMap<>();
+    private ChessGame currentGame;
 
     public LoggedInClient(String serverUrl, AuthData authData) {
         server = new ServerFacade(serverUrl);
@@ -82,6 +85,10 @@ public class LoggedInClient {
             return "No games created";
         }
 
+        for (GameData game : games) {
+            individualGames.put(game.gameID(), game);
+        }
+
         StringBuilder gamesList = new StringBuilder();
         for (int i = 0; i < games.size(); i++) {
             GameData game = games.get(i);
@@ -110,6 +117,8 @@ public class LoggedInClient {
         String chosenGame = params[0];
         Integer gameID = pickGame(chosenGame);
         String color = params[1].toUpperCase();
+        GameData requestedGame = individualGames.get(gameID);
+        currentGame = requestedGame.game();
 
         if (gameID == null) {
             gameState = State.NOGAME;
@@ -161,66 +170,6 @@ public class LoggedInClient {
                 """;
     }
 
-    public void printBoard(State color) {
-        String[][] board = {
-                {"R","N","B","Q","K","B","N","R"},
-                {"P","P","P","P","P","P","P","P"},
-                {" ", " ", " ", " ", " ", " ", " ", " "},
-                {" ", " ", " ", " ", " ", " ", " ", " "},
-                {" ", " ", " ", " ", " ", " ", " ", " "},
-                {" ", " ", " ", " ", " ", " ", " ", " "},
-                {"P","P","P","P","P","P","P","P"},
-                {"R","N","B","Q","K","B","N","R"},
-        };
-        System.out.println();
-        if (color == State.BLACK) {
-            printBlackBoard(board);
-        } else {
-            printWhiteBoard(board);
-        }
-        System.out.print(RESET_BG_COLOR + RESET_TEXT_COLOR);
-    }
-
-    public void printWhiteBoard(String[][] board) {
-        System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "    a  b  c  d  e  f  g  h    "
-                + RESET_BG_COLOR);
-        for (int row = 0; row < 8; row++) {
-            System.out.print(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + " " + (8-row) + " ");
-
-            for (int col = 0; col < 8; col++) {
-                String bgColor = (row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
-                String piece = board[row][col];
-
-                System.out.print(bgColor + " " + piece + " ");
-            }
-            System.out.print(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + " " + (8-row) + " " + RESET_BG_COLOR);
-            System.out.println();
-        }
-
-        System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "    a  b  c  d  e  f  g  h    "
-                + RESET_BG_COLOR);
-    }
-
-    public void printBlackBoard(String[][] board) {
-        System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "    h  g  f  e  d  c  b  a    "
-                + RESET_BG_COLOR);
-        for (int row = 7; row >= 0; row--) {
-            System.out.print(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + " " + (8-row) + " ");
-
-            for (int col = 7; col >= 0; col--) {
-                String bgColor = (row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
-                String piece = board[row][col];
-
-                System.out.print(bgColor + " " + piece + " ");
-            }
-            System.out.print(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + " " + (8-row) + " " + RESET_BG_COLOR);
-            System.out.println();
-        }
-
-        System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "    h  g  f  e  d  c  b  a    "
-                + RESET_BG_COLOR);
-    }
-
     private Integer pickGame(String gameIdString) {
         int chosenGame;
         try {
@@ -230,5 +179,9 @@ public class LoggedInClient {
         }
 
         return listToGameId.get(chosenGame);
+    }
+
+    public ChessGame getCurrentGame() {
+        return currentGame;
     }
 }

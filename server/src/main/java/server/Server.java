@@ -21,6 +21,7 @@ public class Server {
     private final GameService gameService;
     private final WebsocketHandler websocketHandler;
 
+
     public Server() {
         var dataAccess = new SqlDataAccess();
         userService = new UserService(dataAccess);

@@ -24,15 +24,18 @@ public class GameClient implements NotificationHandler{
     private State gameState = State.NOGAME;
     private State colorState = State.WHITE;
     private final AuthData authData;
+    private ChessGame chessGame;
 
-    public GameClient(String serverUrl, AuthData authData) {
+    public GameClient(String serverUrl, AuthData authData, ChessGame chessGame) {
         server = new ServerFacade(serverUrl);
         ws = new WebsocketServerFacade(serverUrl, this);
         this.authData = authData;
+        this.chessGame = chessGame;
     }
 
     public void run() {
         System.out.print(help());
+        redraw();
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
@@ -85,7 +88,7 @@ public class GameClient implements NotificationHandler{
 
 
     public void redraw() {
-       printBoard(game, colorState);
+       printBoard(chessGame, colorState);
     }
 
 
