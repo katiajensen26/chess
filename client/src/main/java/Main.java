@@ -1,5 +1,6 @@
 import chess.*;
 import model.AuthData;
+import ui.GameClient;
 import ui.LoggedInClient;
 import ui.QuitException;
 import ui.StarterClient;
@@ -20,10 +21,21 @@ public class Main {
                     starterClient.run();
                     AuthData authData = starterClient.getAuthData();
                     if (authData == null) {
-                        running = false;
-                    } else {
-                        new LoggedInClient(serverUrl, authData).run();
+                        break;
                     }
+                    boolean loggedIn = true;
+                    String next = "";
+                    while (loggedIn) {
+                        LoggedInClient loggedInClient = new LoggedInClient(serverUrl, authData);
+                        next = loggedInClient.run();
+                        if (next.equals("GAME")) {
+                            GameClient gameClient = new GameClient(serverUrl, authData);
+                            gameClient.run();
+                        } else if (next.equals("LOGOUT")) {
+                            loggedIn = false;
+                        }
+                    }
+
                 } catch (QuitException x) {
                     running = false;
                 }

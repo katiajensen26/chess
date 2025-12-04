@@ -21,17 +21,17 @@ public class LoggedInClient {
         this.authData = authData;
     }
 
-    public void run() {
+    public String run() {
         System.out.print(help());
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equals("quit")) {
             if (state == State.SIGNEDOUT) {
-                break;
+                return "LOGOUT";
             }
             if (gameState == State.INGAME) {
-                printBoard(colorState);
+                return "GAME";
             }
             printPrompt();
             String line = scanner.nextLine();
@@ -45,6 +45,7 @@ public class LoggedInClient {
             }
         }
         System.out.println();
+        return "DONE";
     }
 
     public void printPrompt() {

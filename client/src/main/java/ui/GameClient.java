@@ -1,6 +1,7 @@
 package ui;
 
 import model.AuthData;
+import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -13,8 +14,9 @@ import static ui.EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
 import static ui.EscapeSequences.SET_BG_COLOR_WHITE;
 import static ui.EscapeSequences.SET_TEXT_COLOR_BLUE;
 
-public class GameClient {
+public class GameClient implements NotificationHandler{
     private final ServerFacade server;
+    private final WebsocketServerFacade ws;
     private State state = State.SIGNEDIN;
     private State gameState = State.NOGAME;
     private State colorState = State.WHITE;
@@ -22,6 +24,7 @@ public class GameClient {
 
     public GameClient(String serverUrl, AuthData authData) {
         server = new ServerFacade(serverUrl);
+        ws = new WebsocketServerFacade(serverUrl, this);
         this.authData = authData;
     }
 
@@ -61,7 +64,7 @@ public class GameClient {
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "r", "redraw" -> redraw();
+//                case "r", "redraw" -> redraw();
 //                case "m", "move" -> makeMove(params);
 //                case "h", "highlight" -> highlightMoves();
 //                case "r", "resign" -> resign();
@@ -156,4 +159,9 @@ public class GameClient {
                 """;
     }
 
+    @Override
+    public void notify(ServerMessage serverMessage) {
+        System.out.println(SET_TEXT_COLOR_BLUE + serverMessage.toString());
+        printPrompt();
+    }
 }
