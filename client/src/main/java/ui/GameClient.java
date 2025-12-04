@@ -9,8 +9,7 @@ import model.GameData;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.ServerMessage;
 
-import java.util.Arrays;
-import java.util.Scanner;
+import java.util.*;
 
 import static ui.EscapeSequences.*;
 import static ui.EscapeSequences.RESET_BG_COLOR;
@@ -106,8 +105,31 @@ public class GameClient implements NotificationHandler{
         ws.makeMove(authData.authToken(), chessGame.gameID(), requestedMove);
     }
 
+    public void resign() {
+        ws.resign(authData.authToken(), chessGame.gameID());
+    }
 
-    public void printBoard(ChessGame game, State color) {
+    public void leave() {
+        ws.leave(authData.authToken(), chessGame.gameID());
+    }
+
+    public void highlightMoves(String... params) {
+        String position = params[0];
+
+        ChessPosition piecePosition = parsePosition(position);
+
+        Collection<ChessMove> validMoves = currentGame.validMoves(piecePosition);
+        Collection<ChessPosition> highlights = new ArrayList<>();
+
+        for (ChessMove move : validMoves) {
+            highlights.add(move.getEndPosition());
+        }
+
+        printBoard(currentGame, colorState, highlights);
+    }
+
+
+    public void printBoard(ChessGame game, State color, Collection<ChessPosition> highlights) {
         String[][] board = new String[8][8];
         var currentBoard = game.getBoard();
         for (int i = 1; i <= 8; i++) {
@@ -122,23 +144,11 @@ public class GameClient implements NotificationHandler{
         }
         System.out.println();
         if (color == State.BLACK) {
-            printBlackBoard(board);
+            printBlackBoard(board, highlights);
         } else {
-            printWhiteBoard(board);
+            printWhiteBoard(board, highlights);
         }
         System.out.print(RESET_BG_COLOR + RESET_TEXT_COLOR);
-    }
-
-    public void resign() {
-        ws.resign(authData.authToken(), chessGame.gameID());
-    }
-
-    public void leave() {
-        ws.leave(authData.authToken(), chessGame.gameID());
-    }
-
-    public void highlightMoves() {
-
     }
 
     public String pieceSymbol(ChessPiece piece) {
@@ -159,7 +169,7 @@ public class GameClient implements NotificationHandler{
         return symbol;
     }
 
-    public void printWhiteBoard(String[][] board) {
+    public void printWhiteBoard(String[][] board, Collection<ChessPosition> highlights) {
         System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "    a  b  c  d  e  f  g  h    "
                 + RESET_BG_COLOR);
         for (int row = 0; row < 8; row++) {
@@ -167,6 +177,11 @@ public class GameClient implements NotificationHandler{
 
             for (int col = 0; col < 8; col++) {
                 String bgColor = (row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
+
+                ChessPosition currentPos = new ChessPosition(row, col);
+                if (highlights != null && highlights.contains(currentPos)) {
+                    bgColor = SET_BG_COLOR_YELLOW;
+                }
                 String piece = board[row][col];
 
                 System.out.print(bgColor + " " + piece + " ");
@@ -179,7 +194,7 @@ public class GameClient implements NotificationHandler{
                 + RESET_BG_COLOR);
     }
 
-    public void printBlackBoard(String[][] board) {
+    public void printBlackBoard(String[][] board, Collection<ChessPosition> highlights) {
         System.out.println(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + "    h  g  f  e  d  c  b  a    "
                 + RESET_BG_COLOR);
         for (int row = 7; row >= 0; row--) {
@@ -187,6 +202,11 @@ public class GameClient implements NotificationHandler{
 
             for (int col = 7; col >= 0; col--) {
                 String bgColor = (row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
+
+                ChessPosition currentPos = new ChessPosition(row, col);
+                if (highlights != null && highlights.contains(currentPos)) {
+                    bgColor = SET_BG_COLOR_YELLOW;
+                }
                 String piece = board[row][col];
 
                 System.out.print(bgColor + " " + piece + " ");
