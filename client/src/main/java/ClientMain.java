@@ -1,11 +1,10 @@
-import chess.*;
 import model.AuthData;
 import ui.GameClient;
 import ui.LoggedInClient;
 import ui.QuitException;
 import ui.StarterClient;
 
-public class Main {
+public class ClientMain {
     public static void main(String[] args) {
         String serverUrl = "http://localhost:8080";
         if (args.length == 1) {
