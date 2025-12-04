@@ -6,7 +6,9 @@ import chess.ChessPiece;
 import chess.ChessPosition;
 import model.AuthData;
 import model.GameData;
+import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.util.*;
@@ -244,12 +246,21 @@ public class GameClient implements NotificationHandler{
 
     @Override
     public void notify(ServerMessage serverMessage) {
-        if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
-            websocket.messages.LoadGameMessage loadGameMessage = ((LoadGameMessage) serverMessage);
-            currentGame = loadGameMessage.getGame();
-            redraw();
+        switch (serverMessage.getServerMessageType()) {
+            case NOTIFICATION -> {
+                NotificationMessage message = (NotificationMessage) serverMessage;
+                System.out.println(SET_TEXT_COLOR_BLUE + message.getMessage());
+            }
+            case LOAD_GAME -> {
+                LoadGameMessage gameMessage = (LoadGameMessage) serverMessage;
+                currentGame = gameMessage.getGame();
+                redraw();
+            }
+            case ERROR -> {
+                ErrorMessage errorMessage = (ErrorMessage) serverMessage;
+                System.out.println(SET_TEXT_COLOR_RED + errorMessage.getErrorMessage());
+            }
         }
-        System.out.println(SET_TEXT_COLOR_BLUE + serverMessage.toString());
         printPrompt();
     }
 
