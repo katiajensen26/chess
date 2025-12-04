@@ -2,8 +2,13 @@ package ui;
 
 import chess.ChessMove;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import jakarta.websocket.*;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -27,7 +32,17 @@ public class WebsocketServerFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
+                    JsonObject obj = JsonParser.parseString(message).getAsJsonObject();
+                    String type = obj.get("serverMessageType").getAsString();
+
+                    ServerMessage serverMessage;
+                    switch (type) {
+                        case "NOTIFICATION" -> serverMessage = new Gson().fromJson(obj, NotificationMessage.class);
+                        case "LOAD_GAME" -> serverMessage = new Gson().fromJson(obj, LoadGameMessage.class);
+                        case "ERROR" -> serverMessage = new Gson().fromJson(obj, ErrorMessage.class);
+                        default -> serverMessage = new Gson().fromJson(obj, ServerMessage.class);
+                    }
+//                    ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
                     notificationHandler.notify(serverMessage);
                 }
             });

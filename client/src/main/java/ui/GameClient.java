@@ -42,7 +42,6 @@ public class GameClient implements NotificationHandler{
     public void run() {
         System.out.print(help());
         ws.connect(authData.authToken(), chessGame.gameID());
-        redraw();
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
@@ -246,20 +245,14 @@ public class GameClient implements NotificationHandler{
 
     @Override
     public void notify(ServerMessage serverMessage) {
-        switch (serverMessage.getServerMessageType()) {
-            case NOTIFICATION -> {
-                NotificationMessage message = (NotificationMessage) serverMessage;
-                System.out.println(SET_TEXT_COLOR_BLUE + message.getMessage());
-            }
-            case LOAD_GAME -> {
-                LoadGameMessage gameMessage = (LoadGameMessage) serverMessage;
-                currentGame = gameMessage.getGame();
-                redraw();
-            }
-            case ERROR -> {
-                ErrorMessage errorMessage = (ErrorMessage) serverMessage;
-                System.out.println(SET_TEXT_COLOR_RED + errorMessage.getErrorMessage());
-            }
+
+        if (serverMessage instanceof NotificationMessage) {
+            System.out.println(SET_TEXT_COLOR_BLUE + ((NotificationMessage) serverMessage).getMessage());
+        } else if (serverMessage instanceof LoadGameMessage) {
+            currentGame = ((LoadGameMessage) serverMessage).getGame();
+            redraw();
+        } else if (serverMessage instanceof ErrorMessage) {
+            System.out.println(SET_TEXT_COLOR_RED + ((ErrorMessage) serverMessage).getErrorMessage());
         }
         printPrompt();
     }
