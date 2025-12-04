@@ -21,7 +21,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     @Override
     public void handleClose(@NotNull WsCloseContext ctx) throws Exception {
-        System.out.print("Websocket closed");
+        System.out.print("Websocket closed\n");
     }
 
     @Override

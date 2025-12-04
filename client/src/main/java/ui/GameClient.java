@@ -1,5 +1,8 @@
 package ui;
 
+import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import model.AuthData;
 import websocket.messages.ServerMessage;
 
@@ -82,21 +85,23 @@ public class GameClient implements NotificationHandler{
 
 
     public void redraw() {
-       printBoard(colorState);
+       printBoard(game, colorState);
     }
 
 
-    public void printBoard(State color) {
-        String[][] board = {
-                {"R","N","B","Q","K","B","N","R"},
-                {"P","P","P","P","P","P","P","P"},
-                {" ", " ", " ", " ", " ", " ", " ", " "},
-                {" ", " ", " ", " ", " ", " ", " ", " "},
-                {" ", " ", " ", " ", " ", " ", " ", " "},
-                {" ", " ", " ", " ", " ", " ", " ", " "},
-                {"P","P","P","P","P","P","P","P"},
-                {"R","N","B","Q","K","B","N","R"},
-        };
+    public void printBoard(ChessGame game, State color) {
+        String[][] board = new String[8][8];
+        var currentBoard = game.getBoard();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                var piece = currentBoard.getPiece(new ChessPosition(i, j));
+                if (piece == null) {
+                    board[i][j] = " ";
+                } else {
+                    board[i][j] = pieceSymbol(piece);
+                }
+            }
+        }
         System.out.println();
         if (color == State.BLACK) {
             printBlackBoard(board);
@@ -104,6 +109,24 @@ public class GameClient implements NotificationHandler{
             printWhiteBoard(board);
         }
         System.out.print(RESET_BG_COLOR + RESET_TEXT_COLOR);
+    }
+
+    public String pieceSymbol(ChessPiece piece) {
+        String symbol;
+        switch (piece.getPieceType()) {
+            case PAWN -> symbol = "P";
+            case ROOK -> symbol = "R";
+            case BISHOP -> symbol = "B";
+            case KNIGHT -> symbol = "N";
+            case QUEEN -> symbol = "Q";
+            case KING -> symbol = "K";
+            default -> symbol = "?";
+        }
+
+        if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+            symbol = symbol.toLowerCase();
+        }
+        return symbol;
     }
 
     public void printWhiteBoard(String[][] board) {

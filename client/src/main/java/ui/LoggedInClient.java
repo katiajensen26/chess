@@ -125,7 +125,7 @@ public class LoggedInClient {
         if (color.equals("BLACK")) {
             colorState = State.BLACK;
         }
-        return String.format("Successfully joined game %s as %s", chosenGame, color);
+        return String.format("Successfully joined game %s as %s \n", chosenGame, color);
     }
 
     public String watchGame(String... params) {
