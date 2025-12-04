@@ -144,6 +144,9 @@ public class LoggedInClient {
         }
         String chosenGame = params[0];
         Integer gameId = pickGame(chosenGame);
+        requestedGame = individualGames.get(gameId);
+        currentGame = requestedGame.game();
+
         if (gameId == null) {
             throw new ResponseException(ResponseException.StatusCode.BadRequest, "Game doesn't exist.");
         }
