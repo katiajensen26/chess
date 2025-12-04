@@ -249,7 +249,7 @@ public class GameClient implements NotificationHandler{
             currentGame = loadGameMessage.getGame();
             redraw();
         }
-        System.out.println(SET_TEXT_COLOR_BLUE + serverMessage.getMessage());
+        System.out.println(SET_TEXT_COLOR_BLUE + serverMessage.toString());
         printPrompt();
     }
 
