@@ -26,7 +26,7 @@ public class GameClient implements NotificationHandler{
     private State colorState = State.WHITE;
     private final AuthData authData;
     private ChessGame currentGame;
-    private GameData chessGame;
+    private final GameData chessGame;
 
     public GameClient(String serverUrl, AuthData authData, GameData chessGame, State colorState) {
         server = new ServerFacade(serverUrl);
@@ -89,11 +89,12 @@ public class GameClient implements NotificationHandler{
     }
 
 
-    public void redraw() {
-       printBoard(currentGame, colorState);
+    public String redraw() {
+       printBoard(currentGame, colorState, null);
+       return "";
     }
 
-    public void makeMove(String... params) {
+    public String makeMove(String... params) {
         String startPosition = params[0];
         String endPosition = params[1];
 
@@ -103,17 +104,21 @@ public class GameClient implements NotificationHandler{
         ChessMove requestedMove = new ChessMove(startPos, endPos, null);
 
         ws.makeMove(authData.authToken(), chessGame.gameID(), requestedMove);
+        return "";
     }
 
-    public void resign() {
+    public String resign() {
         ws.resign(authData.authToken(), chessGame.gameID());
+        return "";
     }
 
-    public void leave() {
+    public String leave() {
         ws.leave(authData.authToken(), chessGame.gameID());
+        gameState = State.NOGAME;
+        return "";
     }
 
-    public void highlightMoves(String... params) {
+    public String highlightMoves(String... params) {
         String position = params[0];
 
         ChessPosition piecePosition = parsePosition(position);
@@ -126,6 +131,7 @@ public class GameClient implements NotificationHandler{
         }
 
         printBoard(currentGame, colorState, highlights);
+        return "";
     }
 
 
