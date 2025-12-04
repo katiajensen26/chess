@@ -1,9 +1,12 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
 import model.AuthData;
+import model.GameData;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
@@ -20,31 +23,31 @@ import static ui.EscapeSequences.SET_TEXT_COLOR_BLUE;
 public class GameClient implements NotificationHandler{
     private final ServerFacade server;
     private final WebsocketServerFacade ws;
-    private State state = State.SIGNEDIN;
-    private State gameState = State.NOGAME;
+    private State gameState = State.INGAME;
     private State colorState = State.WHITE;
     private final AuthData authData;
-    private ChessGame chessGame;
+    private ChessGame currentGame;
+    private GameData chessGame;
 
-    public GameClient(String serverUrl, AuthData authData, ChessGame chessGame) {
+    public GameClient(String serverUrl, AuthData authData, GameData chessGame, State colorState) {
         server = new ServerFacade(serverUrl);
         ws = new WebsocketServerFacade(serverUrl, this);
         this.authData = authData;
         this.chessGame = chessGame;
+        this.colorState = colorState;
+        currentGame = chessGame.game();
     }
 
     public void run() {
         System.out.print(help());
+        ws.connect(authData.authToken(), chessGame.gameID());
         redraw();
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equals("quit")) {
-            if (state == State.SIGNEDOUT) {
+            if (gameState == State.NOGAME) {
                 break;
-            }
-            if (gameState == State.INGAME) {
-//                printBoard(colorState);
             }
             printPrompt();
             String line = scanner.nextLine();
@@ -70,11 +73,11 @@ public class GameClient implements NotificationHandler{
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-//                case "r", "redraw" -> redraw();
-//                case "m", "move" -> makeMove(params);
-//                case "h", "highlight" -> highlightMoves();
-//                case "r", "resign" -> resign();
-//                case "l", "leave" -> leave();
+                case "d", "redraw" -> redraw();
+                case "m", "move" -> makeMove(params);
+                case "h", "highlight" -> highlightMoves(params);
+                case "r", "resign" -> resign();
+                case "l", "leave" -> leave();
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -88,20 +91,32 @@ public class GameClient implements NotificationHandler{
 
 
     public void redraw() {
-       printBoard(chessGame, colorState);
+       printBoard(currentGame, colorState);
+    }
+
+    public void makeMove(String... params) {
+        String startPosition = params[0];
+        String endPosition = params[1];
+
+        ChessPosition startPos = parsePosition(startPosition);
+        ChessPosition endPos = parsePosition(endPosition);
+
+        ChessMove requestedMove = new ChessMove(startPos, endPos, null);
+
+        ws.makeMove(authData.authToken(), chessGame.gameID(), requestedMove);
     }
 
 
     public void printBoard(ChessGame game, State color) {
         String[][] board = new String[8][8];
         var currentBoard = game.getBoard();
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
                 var piece = currentBoard.getPiece(new ChessPosition(i, j));
                 if (piece == null) {
-                    board[i][j] = " ";
+                    board[i-1][j-1] = " ";
                 } else {
-                    board[i][j] = pieceSymbol(piece);
+                    board[i-1][j-1] = pieceSymbol(piece);
                 }
             }
         }
@@ -112,6 +127,18 @@ public class GameClient implements NotificationHandler{
             printWhiteBoard(board);
         }
         System.out.print(RESET_BG_COLOR + RESET_TEXT_COLOR);
+    }
+
+    public void resign() {
+        ws.resign(authData.authToken(), chessGame.gameID());
+    }
+
+    public void leave() {
+        ws.leave(authData.authToken(), chessGame.gameID());
+    }
+
+    public void highlightMoves() {
+
     }
 
     public String pieceSymbol(ChessPiece piece) {
@@ -178,7 +205,7 @@ public class GameClient implements NotificationHandler{
                 Options:
                 Redraw the board: "r", "redraw"
                 Make a move: "m", "move" <START> <END>
-                Highlight legal moves: "h", "highlight"
+                Highlight legal moves: "h", "highlight" <PIECE POSITION>
                 Resign from a game: "r", "resign"
                 Leave a game: "l", "leave"
                 Print this message: "h", "help"
@@ -187,7 +214,20 @@ public class GameClient implements NotificationHandler{
 
     @Override
     public void notify(ServerMessage serverMessage) {
+        if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+            websocket.messages.LoadGameMessage loadGameMessage = ((LoadGameMessage) serverMessage);
+            currentGame = loadGameMessage.getGame();
+            redraw();
+        }
         System.out.println(SET_TEXT_COLOR_BLUE + serverMessage.toString());
         printPrompt();
+    }
+
+    public ChessPosition parsePosition(String pos) {
+        int col = pos.charAt(0) - 'a';
+
+        int row = 8 - Character.getNumericValue(pos.charAt(1));
+
+        return new ChessPosition(row, col);
     }
 }

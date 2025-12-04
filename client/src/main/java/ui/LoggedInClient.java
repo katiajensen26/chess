@@ -18,6 +18,7 @@ public class LoggedInClient {
     private Map<Integer, Integer> listToGameId = new HashMap<>();
     private Map<Integer, GameData> individualGames = new HashMap<>();
     private ChessGame currentGame;
+    private GameData requestedGame;
 
     public LoggedInClient(String serverUrl, AuthData authData) {
         server = new ServerFacade(serverUrl);
@@ -117,7 +118,7 @@ public class LoggedInClient {
         String chosenGame = params[0];
         Integer gameID = pickGame(chosenGame);
         String color = params[1].toUpperCase();
-        GameData requestedGame = individualGames.get(gameID);
+        requestedGame = individualGames.get(gameID);
         currentGame = requestedGame.game();
 
         if (gameID == null) {
@@ -183,5 +184,13 @@ public class LoggedInClient {
 
     public ChessGame getCurrentGame() {
         return currentGame;
+    }
+
+    public State getColorState() {
+        return colorState;
+    }
+
+    public GameData getRequestedGame() {
+        return requestedGame;
     }
 }

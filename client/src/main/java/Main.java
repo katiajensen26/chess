@@ -29,7 +29,10 @@ public class Main {
                         LoggedInClient loggedInClient = new LoggedInClient(serverUrl, authData);
                         next = loggedInClient.run();
                         if (next.equals("GAME")) {
-                            GameClient gameClient = new GameClient(serverUrl, authData, loggedInClient.getCurrentGame());
+                            GameClient gameClient = new GameClient(serverUrl,
+                                    authData,
+                                    loggedInClient.getRequestedGame(),
+                                    loggedInClient.getColorState());
                             gameClient.run();
                         } else if (next.equals("LOGOUT")) {
                             loggedIn = false;
