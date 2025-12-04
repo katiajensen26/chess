@@ -99,8 +99,8 @@ public class GameClient implements NotificationHandler{
         String startPosition = params[0];
         String endPosition = params[1];
 
-        ChessPosition startPos = parsePosition(startPosition);
-        ChessPosition endPos = parsePosition(endPosition);
+        ChessPosition startPos = parsePosition(startPosition, colorState);
+        ChessPosition endPos = parsePosition(endPosition, colorState);
 
         ChessMove requestedMove = new ChessMove(startPos, endPos, null);
 
@@ -122,7 +122,7 @@ public class GameClient implements NotificationHandler{
     public String highlightMoves(String... params) {
         String position = params[0];
 
-        ChessPosition piecePosition = parsePosition(position);
+        ChessPosition piecePosition = parsePosition(position, colorState);
 
         Collection<ChessMove> validMoves = currentGame.validMoves(piecePosition);
         Collection<ChessPosition> highlights = new ArrayList<>();
@@ -257,10 +257,14 @@ public class GameClient implements NotificationHandler{
         printPrompt();
     }
 
-    public ChessPosition parsePosition(String pos) {
+    public ChessPosition parsePosition(String pos, State colorState) {
         int col = pos.charAt(0) - 'a' + 1;
 
         int row = Character.getNumericValue(pos.charAt(1));
+
+        if (colorState == State.BLACK) {
+            row = 7 - row;
+        }
 
         return new ChessPosition(row, col);
     }
