@@ -184,7 +184,9 @@ public class GameClient implements NotificationHandler{
             for (int col = 0; col < 8; col++) {
                 String bgColor = (row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
 
-                ChessPosition currentPos = new ChessPosition(row, col);
+                int boardRow = 8 - row;
+                int boardColumn = 1 + col;
+                ChessPosition currentPos = new ChessPosition(boardRow, boardColumn);
                 if (highlights != null && highlights.contains(currentPos)) {
                     bgColor = SET_BG_COLOR_YELLOW;
                 }
@@ -209,7 +211,9 @@ public class GameClient implements NotificationHandler{
             for (int col = 7; col >= 0; col--) {
                 String bgColor = (row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
 
-                ChessPosition currentPos = new ChessPosition(row, col);
+                int boardRow = row + 3;
+                int boardColumn = col + 1;
+                ChessPosition currentPos = new ChessPosition(boardRow, boardColumn);
                 if (highlights != null && highlights.contains(currentPos)) {
                     bgColor = SET_BG_COLOR_YELLOW;
                 }
@@ -245,14 +249,14 @@ public class GameClient implements NotificationHandler{
             currentGame = loadGameMessage.getGame();
             redraw();
         }
-        System.out.println(SET_TEXT_COLOR_BLUE + serverMessage.toString());
+        System.out.println(SET_TEXT_COLOR_BLUE + serverMessage.getMessage());
         printPrompt();
     }
 
     public ChessPosition parsePosition(String pos) {
-        int col = pos.charAt(0) - 'a';
+        int col = pos.charAt(0) - 'a' + 1;
 
-        int row = 8 - Character.getNumericValue(pos.charAt(1));
+        int row = Character.getNumericValue(pos.charAt(1));
 
         return new ChessPosition(row, col);
     }
