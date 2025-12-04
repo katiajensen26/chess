@@ -80,7 +80,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void makeMove(WsMessageContext ctx, UserGameCommand command) throws DataAccessException, IOException, InvalidMoveException {
+    private void makeMove(WsMessageContext ctx, UserGameCommand command) throws DataAccessException, IOException {
         var session = ctx.session;
         var game = dataAccess.getGame(command.getGameID());
         ChessGame chessGame = game.game();
