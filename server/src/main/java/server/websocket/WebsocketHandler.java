@@ -12,12 +12,15 @@ import dataaccess.SqlDataAccess;
 import chess.ChessGame;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
     private final ConnectionManager connections = new ConnectionManager();
     private final SqlDataAccess dataAccess = new SqlDataAccess();
+    private final Map<Integer, GameState> gameStates = new HashMap<>();
 
 
     @Override
@@ -68,6 +71,7 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 role = "observer";
             }
             connections.add(gameId, session, username);
+            gameStates.putIfAbsent(gameId, GameState.ACTIVE);
 
             var loadGame = new LoadGameMessage(game.game());
             connections.directSend(gameId, session, loadGame);
@@ -114,10 +118,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             opponentUsername = game.blackUsername();
         }
 
-        if (Objects.equals(game.whiteUsername(), "RESIGNED") ||
-                Objects.equals(game.blackUsername(), "RESIGNED") ||
-                chessGame.isInCheckmate(opponent) ||
-                chessGame.isInStalemate(opponent)) {
+        GameState gameState = gameStates.get(game.gameID());
+        if (!gameState.equals(GameState.ACTIVE)) {
             var errorMessage = new ErrorMessage("Game is over. No moves can be made.");
             connections.directSend(command.getGameID(), session, errorMessage);
             return;
@@ -139,10 +141,12 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         if (chessGame.isInCheckmate(opponent)) {
             var message = String.format("%s is in checkmate!", opponentUsername);
+            gameStates.put(game.gameID(), GameState.CHECKMATE);
             var notification = new NotificationMessage(message);
             connections.broadcast(null, notification, game.gameID());
         } else if (chessGame.isInStalemate(opponent)) {
             var message = String.format("%s is in stalemate!", opponentUsername);
+            gameStates.put(game.gameID(), GameState.STALEMATE);
             var notification = new NotificationMessage(message);
             connections.broadcast(null, notification, game.gameID());
         } else if (chessGame.isInCheck(opponent)) {
@@ -175,26 +179,15 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var username = authData.username();
         var game = dataAccess.getGame(command.getGameID());
 
-        if (game.whiteUsername().equals("RESIGNED") || game.blackUsername().equals("RESIGNED")) {
+        GameState gameState = gameStates.get(game.gameID());
+        if (gameState.equals(GameState.RESIGNED)) {
             var errorMessage = new ErrorMessage("Game has already ended. You can't resign.");
             connections.directSend(command.getGameID(), session, errorMessage);
             return;
         }
 
-        if (username.equals(game.whiteUsername())) {
-            game = new GameData(game.gameID(),
-                    "RESIGNED",
-                    game.blackUsername(),
-                    game.gameName(),
-                    game.game(),
-                    game.playerColor());
-        } else if (username.equals(game.blackUsername())) {
-            game = new GameData(game.gameID(),
-                    game.whiteUsername(),
-                    "RESIGNED",
-                    game.gameName(),
-                    game.game(),
-                    game.playerColor());
+        if (username.equals(game.whiteUsername()) || username.equals(game.blackUsername())) {
+            gameStates.put(game.gameID(), GameState.RESIGNED);
         } else {
             var errorMessage = new ErrorMessage("Sorry, you can't resign.");
             connections.directSend(command.getGameID(), session, errorMessage);
@@ -235,5 +228,12 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var message = String.format("%s has left the game.", username);
         var notification = new NotificationMessage(message);
         connections.broadcast(session, notification, game.gameID());
+    }
+
+    public enum GameState {
+        ACTIVE,
+        CHECKMATE,
+        STALEMATE,
+        RESIGNED
     }
 }
