@@ -102,7 +102,14 @@ public class GameClient implements NotificationHandler{
         ChessPiece.PieceType promotion = null;
 
         ChessPosition startPos = parsePosition(startPosition, colorState);
+        if (startPos == null) {
+            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Try again.");
+        }
         ChessPosition endPos = parsePosition(endPosition, colorState);
+
+        if (endPos == null) {
+            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Try again.");
+        }
 
         var currentBoard = currentGame.getBoard();
         ChessPiece startPiece = currentBoard.getPiece(startPos);
@@ -264,6 +271,13 @@ public class GameClient implements NotificationHandler{
     }
 
     public ChessPosition parsePosition(String pos, State colorState) {
+        char inputCol = pos.charAt(0);
+        char inputRow = pos.charAt(1);
+
+        if (inputCol < 'a' || inputCol > 'h' || inputRow < 1 || inputRow > 8) {
+            System.out.println("Invalid move. Please enter your coordinates with the letter first and number second");
+            return null;
+        }
         int col = pos.charAt(0) - 'a' + 1;
         int row = Character.getNumericValue(pos.charAt(1));
 
