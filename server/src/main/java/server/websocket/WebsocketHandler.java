@@ -1,5 +1,7 @@
 package server.websocket;
 
+import chess.ChessMove;
+import chess.ChessPosition;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
@@ -167,7 +169,8 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var loadGameMessage = new LoadGameMessage(game.game());
         connections.broadcast(null, loadGameMessage, game.gameID());
 
-        var message = String.format("%s made move: %s", username, move);
+        var originalNotation = backToNotation(move);
+        var message = String.format("%s made move: %s", username, originalNotation);
         var notification = new NotificationMessage(message);
         connections.broadcast(session, notification, game.gameID());
 
@@ -235,5 +238,17 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         CHECKMATE,
         STALEMATE,
         RESIGNED
+    }
+
+    public String backToNotation(ChessMove move) {
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+
+        var startCol = (char) ('a'+ start.getColumn());
+        var endCol = (char) ('a' + end.getColumn());
+        var startRow = 8 - start.getRow();
+        var endRow = 8 - end.getRow();
+
+        return "" + startCol + startRow + endCol + endRow;
     }
 }
