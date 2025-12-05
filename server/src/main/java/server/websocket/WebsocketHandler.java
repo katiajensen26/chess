@@ -114,7 +114,10 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             opponentUsername = game.blackUsername();
         }
 
-        if (Objects.equals(game.whiteUsername(), "RESIGNED") || Objects.equals(game.blackUsername(), "RESIGNED")) {
+        if (Objects.equals(game.whiteUsername(), "RESIGNED") ||
+                Objects.equals(game.blackUsername(), "RESIGNED") ||
+                chessGame.isInCheckmate(opponent) ||
+                chessGame.isInStalemate(opponent)) {
             var errorMessage = new ErrorMessage("Game is over. No moves can be made.");
             connections.directSend(command.getGameID(), session, errorMessage);
             return;
