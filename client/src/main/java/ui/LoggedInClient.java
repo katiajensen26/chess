@@ -79,15 +79,11 @@ public class LoggedInClient {
     }
 
     public String listGames() {
-        Map<String, List<GameData>> gamesMap = server.listGames(authData);
+        loadList();
 
-        List<GameData> games = gamesMap.get("games");
-        if (games == null || games.isEmpty()) {
+        List<GameData> games = new ArrayList<>(individualGames.values());
+        if (games.isEmpty()) {
             return "No games created";
-        }
-
-        for (GameData game : games) {
-            individualGames.put(game.gameID(), game);
         }
 
         StringBuilder gamesList = new StringBuilder();
@@ -121,11 +117,6 @@ public class LoggedInClient {
         requestedGame = individualGames.get(gameID);
         currentGame = requestedGame.game();
 
-        if (gameID == null) {
-            gameState = State.NOGAME;
-            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Please list games to see game IDs");
-        }
-
         if (!color.equals("WHITE") && !color.equals("BLACK")) {
             throw new ResponseException(ResponseException.StatusCode.BadRequest, "Please pick white or black");
         }
@@ -147,9 +138,6 @@ public class LoggedInClient {
         requestedGame = individualGames.get(gameId);
         currentGame = requestedGame.game();
 
-        if (gameId == null) {
-            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Game doesn't exist.");
-        }
         gameState = State.INGAME;
         return String.format("Now observing game %s", chosenGame);
     }
@@ -182,7 +170,30 @@ public class LoggedInClient {
             throw new ResponseException(ResponseException.StatusCode.BadRequest, "Game ID must be a number.");
         }
 
-        return listToGameId.get(chosenGame);
+        if (listToGameId.isEmpty() || individualGames.isEmpty()) {
+            loadList();
+        }
+
+        Integer gameId = listToGameId.get(chosenGame);
+        if (gameId == null) {
+            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Game ID not found. List games to see game IDs");
+        }
+
+        return gameId;
+    }
+
+    private void loadList() {
+        Map<String, List<GameData>> gamesMap = server.listGames(authData);
+        List<GameData> games = gamesMap.get("games");
+
+        listToGameId.clear();
+        individualGames.clear();
+
+        for (int i = 0; i < games.size(); i++) {
+            GameData game = games.get(i);
+            listToGameId.put(i + 1, game.gameID());
+            individualGames.put(game.gameID(), game);
+        }
     }
 
     public ChessGame getCurrentGame() {
