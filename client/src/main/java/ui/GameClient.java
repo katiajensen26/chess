@@ -1,9 +1,6 @@
 package ui;
 
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import model.AuthData;
 import model.GameData;
 import websocket.messages.ErrorMessage;
@@ -102,10 +99,38 @@ public class GameClient implements NotificationHandler{
         String startPosition = params[0];
         String endPosition = params[1];
 
+        ChessPiece.PieceType promotion = null;
+
         ChessPosition startPos = parsePosition(startPosition, colorState);
         ChessPosition endPos = parsePosition(endPosition, colorState);
 
-        ChessMove requestedMove = new ChessMove(startPos, endPos, null);
+        var currentBoard = currentGame.getBoard();
+        ChessPiece startPiece = currentBoard.getPiece(startPos);
+
+        boolean whitePromotion = (startPiece.getPieceType() == ChessPiece.PieceType.PAWN
+                && startPiece.getTeamColor() == ChessGame.TeamColor.WHITE
+                && endPos.getRow() == 8);
+        boolean blackPromotion = (startPiece.getPieceType() == ChessPiece.PieceType.PAWN
+                && startPiece.getTeamColor() == ChessGame.TeamColor.BLACK
+                && endPos.getRow() == 1);
+
+        if (whitePromotion || blackPromotion) {
+            System.out.println("Promote pawn? Pick Q, R, B, N");
+            Scanner scanner = new Scanner(System.in);
+            String promotePick = scanner.nextLine().toUpperCase();
+
+            switch (promotePick) {
+                case "Q" -> promotion = ChessPiece.PieceType.QUEEN;
+                case "R" -> promotion = ChessPiece.PieceType.ROOK;
+                case "B" -> promotion = ChessPiece.PieceType.BISHOP;
+                case "N" -> promotion = ChessPiece.PieceType.KNIGHT;
+                default -> {
+                    System.out.println("I don't recognize that option. Defaulting to Queen.");
+                    promotion = ChessPiece.PieceType.QUEEN;
+                }
+            }
+        }
+        ChessMove requestedMove = new ChessMove(startPos, endPos, promotion);
 
         ws.makeMove(authData.authToken(), chessGame.gameID(), requestedMove);
         return "";
@@ -254,12 +279,12 @@ public class GameClient implements NotificationHandler{
     public void notify(ServerMessage serverMessage) {
 
         if (serverMessage instanceof NotificationMessage) {
-            System.out.println(SET_TEXT_COLOR_BLUE + ((NotificationMessage) serverMessage).getMessage());
+            System.out.println("\n" + SET_TEXT_COLOR_BLUE + ((NotificationMessage) serverMessage).getMessage() + RESET_TEXT_COLOR);
         } else if (serverMessage instanceof LoadGameMessage) {
             currentGame = ((LoadGameMessage) serverMessage).getGame();
             redraw();
         } else if (serverMessage instanceof ErrorMessage) {
-            System.out.println(SET_TEXT_COLOR_RED + ((ErrorMessage) serverMessage).getErrorMessage());
+            System.out.println("\n" + SET_TEXT_COLOR_RED + ((ErrorMessage) serverMessage).getErrorMessage() + RESET_TEXT_COLOR);
         }
         printPrompt();
     }
