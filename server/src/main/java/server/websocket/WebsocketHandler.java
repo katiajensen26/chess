@@ -169,8 +169,9 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var loadGameMessage = new LoadGameMessage(game.game());
         connections.broadcast(null, loadGameMessage, game.gameID());
 
-        var originalNotation = backToNotation(move);
-        var message = String.format("%s made move: %s", username, originalNotation);
+        System.out.println("move object class: " + move.getClass().getName());
+        System.out.println("move.toString()" + move.toString());
+        var message = String.format("%s made move: %s", username, move);
         var notification = new NotificationMessage(message);
         connections.broadcast(session, notification, game.gameID());
 
