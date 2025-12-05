@@ -185,8 +185,9 @@ public class GameClient implements NotificationHandler{
             for (int col = 0; col < 8; col++) {
                 String bgColor = (row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
 
-
-                ChessPosition currentPos = new ChessPosition(row, col);
+                int boardRow = row - 1;
+                int boardCol = col - 1;
+                ChessPosition currentPos = new ChessPosition(boardRow, boardCol);
                 if (highlights != null && highlights.contains(currentPos)) {
                     bgColor = SET_BG_COLOR_YELLOW;
                 }
@@ -211,7 +212,9 @@ public class GameClient implements NotificationHandler{
             for (int col = 7; col >= 0; col--) {
                 String bgColor = (row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
 
-                ChessPosition currentPos = new ChessPosition(row, col);
+                int boardRow = row + 1;
+                int boardCol = col + 1;
+                ChessPosition currentPos = new ChessPosition(boardRow, boardCol);
                 if (highlights != null && highlights.contains(currentPos)) {
                     bgColor = SET_BG_COLOR_YELLOW;
                 }
