@@ -240,16 +240,4 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         STALEMATE,
         RESIGNED
     }
-
-    public String backToNotation(ChessMove move) {
-        ChessPosition start = move.getStartPosition();
-        ChessPosition end = move.getEndPosition();
-
-        var startCol = (char) ('a'+ start.getColumn());
-        var endCol = (char) ('a' + end.getColumn());
-        var startRow = 8 - start.getRow();
-        var endRow = 8 - end.getRow();
-
-        return "" + startCol + startRow + endCol + endRow;
-    }
 }
