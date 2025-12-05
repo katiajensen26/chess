@@ -234,7 +234,7 @@ public class GameClient implements NotificationHandler{
     public String help() {
         return """
                 Options:
-                Redraw the board: "r", "redraw"
+                Redraw the board: "d", "redraw"
                 Make a move: "m", "move" <START> <END>
                 Highlight legal moves: "h", "highlight" <PIECE POSITION>
                 Resign from a game: "r", "resign"
@@ -259,12 +259,7 @@ public class GameClient implements NotificationHandler{
 
     public ChessPosition parsePosition(String pos, State colorState) {
         int col = pos.charAt(0) - 'a' + 1;
-
         int row = Character.getNumericValue(pos.charAt(1));
-
-        if (colorState == State.BLACK) {
-            row = 7 - row;
-        }
 
         return new ChessPosition(row, col);
     }

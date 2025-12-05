@@ -12,6 +12,7 @@ import dataaccess.SqlDataAccess;
 import chess.ChessGame;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
@@ -94,9 +95,9 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var playerColor = ChessGame.TeamColor.WHITE;
         var move = command.getMove();
 
-        if (username.equals(game.whiteUsername())) {
+        if (Objects.equals(username, game.whiteUsername())) {
             playerColor = ChessGame.TeamColor.WHITE;
-        } else if (username.equals(game.blackUsername())) {
+        } else if (Objects.equals(username, game.blackUsername())) {
             playerColor = ChessGame.TeamColor.BLACK;
         } else {
             var errorMessage = new ErrorMessage("You are not a player. You can't make a move.");
@@ -107,13 +108,13 @@ public class WebsocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         String opponentUsername;
 
         var opponent = (playerColor == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
-        if (opponent.equals(ChessGame.TeamColor.WHITE)) {
+        if (Objects.equals(opponent, ChessGame.TeamColor.WHITE)) {
             opponentUsername = game.whiteUsername();
         } else {
             opponentUsername = game.blackUsername();
         }
 
-        if (game.whiteUsername().equals("RESIGNED") || game.blackUsername().equals("RESIGNED")) {
+        if (Objects.equals(game.whiteUsername(), "RESIGNED") || Objects.equals(game.blackUsername(), "RESIGNED")) {
             var errorMessage = new ErrorMessage("Game is over. No moves can be made.");
             connections.directSend(command.getGameID(), session, errorMessage);
             return;
