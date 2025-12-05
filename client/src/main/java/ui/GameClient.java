@@ -212,18 +212,7 @@ public class GameClient implements NotificationHandler{
                 + RESET_BG_COLOR);
         for (int row = 7; row >= 0; row--) {
             System.out.print(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + " " + (1+row) + " ");
-
-            for (int col = 0; col < 8; col++) {
-                String bgColor = (row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
-
-                ChessPosition currentPos = highlightSquares(row, col);
-                if (highlights != null && highlights.contains(currentPos)) {
-                    bgColor = SET_BG_COLOR_YELLOW;
-                }
-                String piece = board[row][col];
-
-                System.out.print(bgColor + " " + piece + " ");
-            }
+            printRows(board, highlights, row, 0, 8, 1);
             System.out.print(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + " " + (1+row) + " " + RESET_BG_COLOR);
             System.out.println();
         }
@@ -237,18 +226,7 @@ public class GameClient implements NotificationHandler{
                 + RESET_BG_COLOR);
         for (int row = 0; row < 8; row++) {
             System.out.print(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + " " + (1+row) + " ");
-
-            for (int col = 7; col >= 0; col--) {
-                String bgColor = (row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
-
-                ChessPosition currentPos = highlightSquares(row, col);
-                if (highlights != null && highlights.contains(currentPos)) {
-                    bgColor = SET_BG_COLOR_YELLOW;
-                }
-                String piece = board[row][col];
-
-                System.out.print(bgColor + " " + piece + " ");
-            }
+            printRows(board, highlights, row, 7, -1, -1);
             System.out.print(SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLUE + " " + (1+row) + " " + RESET_BG_COLOR);
             System.out.println();
         }
@@ -290,6 +268,19 @@ public class GameClient implements NotificationHandler{
         int row = Character.getNumericValue(pos.charAt(1));
 
         return new ChessPosition(row, col);
+    }
+
+    private void printRows(String[][] board, Collection<ChessPosition> highlights, int row, int startCol, int endCol, int colStep) {
+        for (int col = startCol; col != endCol; col += colStep) {
+            String bgColor = (row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
+            ChessPosition currentPos = highlightSquares(row, col);
+            if (highlights != null && highlights.contains(currentPos)) {
+                bgColor = SET_BG_COLOR_YELLOW;
+            }
+            String piece = board[row][col];
+
+            System.out.print(bgColor + " " + piece + " ");
+        }
     }
 
     public ChessPosition highlightSquares(int row, int col) {
