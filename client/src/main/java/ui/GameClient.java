@@ -96,6 +96,9 @@ public class GameClient implements NotificationHandler{
     }
 
     public String makeMove(String... params) {
+        if (params.length != 2) {
+            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Expected: <START> <END>");
+        }
         String startPosition = params[0];
         String endPosition = params[1];
 
@@ -120,6 +123,9 @@ public class GameClient implements NotificationHandler{
     }
 
     public String highlightMoves(String... params) {
+        if (params.length != 1) {
+            throw new ResponseException(ResponseException.StatusCode.BadRequest, "Expected: <PIECE POSITION>");
+        }
         String position = params[0];
 
         ChessPosition piecePosition = parsePosition(position, colorState);
@@ -240,6 +246,7 @@ public class GameClient implements NotificationHandler{
                 Resign from a game: "r", "resign"
                 Leave a game: "l", "leave"
                 Print this message: "h", "help"
+                **All positions must be entered with a lowercase letter and a number. Ex: e2**
                 """;
     }
 
