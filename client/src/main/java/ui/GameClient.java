@@ -185,8 +185,8 @@ public class GameClient implements NotificationHandler{
             for (int col = 0; col < 8; col++) {
                 String bgColor = (row + col) % 2 == 0 ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
 
-                int boardRow = row - 1;
-                int boardCol = col - 1;
+                int boardRow = row + 1;
+                int boardCol = col + 1;
                 ChessPosition currentPos = new ChessPosition(boardRow, boardCol);
                 if (highlights != null && highlights.contains(currentPos)) {
                     bgColor = SET_BG_COLOR_YELLOW;

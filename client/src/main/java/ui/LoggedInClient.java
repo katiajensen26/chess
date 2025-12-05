@@ -159,7 +159,7 @@ public class LoggedInClient {
         state = State.SIGNEDOUT;
         gameState = State.NOGAME;
         colorState = State.WHITE;
-        return "Successfully logged out.";
+        return "Successfully logged out.\n";
     }
 
     public String help() {
