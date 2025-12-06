@@ -144,7 +144,18 @@ public class GameClient implements NotificationHandler{
     }
 
     public String resign() {
-        ws.resign(authData.authToken(), chessGame.gameID());
+        System.out.println("Are you sure you want to resign? (Y or N)");
+        Scanner scanner = new Scanner(System.in);
+        String answer = scanner.nextLine().toUpperCase();
+
+        if (answer.equals("Y")) {
+            ws.resign(authData.authToken(), chessGame.gameID());
+        } else if (answer.equals("N")) {
+            return "Then the game will continue.";
+
+        } else {
+            return "If you want to resign, try the command again and enter Y or N.";
+        }
         return "";
     }
 
@@ -271,13 +282,6 @@ public class GameClient implements NotificationHandler{
     }
 
     public ChessPosition parsePosition(String pos, State colorState) {
-        char inputCol = pos.charAt(0);
-        char inputRow = pos.charAt(1);
-
-        if (inputCol < 'a' || inputCol > 'h' || inputRow < 1 || inputRow > 8) {
-            System.out.println("Invalid move. Please enter your coordinates with the letter first and number second");
-            return null;
-        }
         int col = pos.charAt(0) - 'a' + 1;
         int row = Character.getNumericValue(pos.charAt(1));
 
